@@ -1,0 +1,4 @@
+"0","t = SPY"
+"0","init.d <- index(t)[1]"
+"0","e <- t[, 6]/as.numeric(t[init.d, 6])"
+"0","plot(e, main=names(e))"
