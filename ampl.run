@@ -1,0 +1,10 @@
+reset ;
+option solver ipopt ; 
+model ampl.mod ;
+data ampl.dat ;
+solve ;
+display x > ampl.txt ;
+display solve_result_num > ampl.txt ;
+display solve_result > ampl.txt ;
+display solve_message > ampl.txt ;
+exit ;

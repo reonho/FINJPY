@@ -30,14 +30,18 @@ Therefore, a typical Japanese retail investor is distinct from an American or Eu
 
 Given the conditions described above, we choose to adopt the *Efficient Risk* or *Markowitz Portfolio*
 
-**Fix Return and Minimise Risk**
+This means we minimise risk for a target level of return.
 
 (OR find an objective function from here)
 https://pyportfolioopt.readthedocs.io/en/latest/MeanVariance.html 
 
-For a start, maximise Sharpe:
+Target Return: Global Average Inflation + 1% = 4.5%
+https://www.statista.com/statistics/256598/global-inflation-rate-compared-to-previous-year/
 
-$max \ \frac{E(R) - r_f}{SD(R)}$
+Constraints:
+
+1. Long only
+2. Maximum weight of 20% per ETF
 
 
 ### Amount
@@ -57,7 +61,7 @@ We start with the basket of ETFs provided
 - VT: GLOBAL STOCK
 - HVST AU: EQUITY DIVIDEND ETF AU
 
-We choose an allocation of 40% Bond and 60% Equity to reflect the risk appetite we have chosen.
+
 
 
 ## 2. Security Analysis
@@ -171,13 +175,20 @@ heatmap(corrdata)
 ```
 ## 3. Portfolio Construction
 ```{r}
-returns
+
 pSpec = portfolioSpec()
-setSolver(pSpec) <- "solveRshortExact"
-tangencyPortfolio(as.timeSeries(returns[complete.cases(returns),]))
+setTargetReturn(pSpec) <- 0.045
+setSolver(pSpec) <- "solveRsocp"
+print(pSpec)
 
 ```
+```{r}
+Constraints = c("minW=c(0,0,0,0,0,0,0,0,0)", "maxW=c(0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2)" )
+efficientPortfolio(data = as.timeSeries(returns[complete.cases(returns),]), spec =  pSpec)
 
+
+
+```
 ## 4. Portfolio Implementation
 
 

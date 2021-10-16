@@ -1,7 +1,0 @@
-"0","tickers = list(BIV,VCSH,BNDX,VNQ,VT,SPY,`YJ1343.T`,`YJ1555.T`,HVST.AX)"
-"0","name = list('BIV','VCSH','BNDX','VNQ','VT','SPY','YJ1343.T','YJ1555.T','HVST.AX')"
-"0",""
-"0","t = BIV"
-"0","init.d <- index(t)[1]"
-"0","e <- t[, 6]/as.numeric(t[init.d, 6])"
-"0","plot(e, main=names(e))"
