@@ -28,9 +28,11 @@ Therefore, a typical Japanese retail investor is distinct from an American or Eu
 
 ### Objective Function
 
-Given the conditions described above, we choose to:
+Given the conditions described above, we choose to adopt the *Efficient Risk* or *Markowitz Portfolio*
 
-(find an objective function from here)
+**Fix Return and Minimise Risk**
+
+(OR find an objective function from here)
 https://pyportfolioopt.readthedocs.io/en/latest/MeanVariance.html 
 
 For a start, maximise Sharpe:
