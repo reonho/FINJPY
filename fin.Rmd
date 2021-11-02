@@ -26,7 +26,7 @@ The typical Japanese retail investor is risk averse. Many older Japanese investo
 Therefore, a typical Japanese retail investor is distinct from an American or European retail investor in that they have experienced more market downside and less economic euphoria. We expect that they will have a more conservative risk appetite and less tolerance for portfolio drawdown.
 
 
-### Objective Function
+### Objective Function (CHANGE TO EFFICIENT RETURN)
 
 Given the conditions described above, we choose to adopt the *Efficient Risk* or *Markowitz Portfolio*
 
@@ -61,7 +61,15 @@ We start with the basket of ETFs provided
 - VT: GLOBAL STOCK
 - HVST AU: EQUITY DIVIDEND ETF AU
 
+??? Analyse core characteristics 
+- Fees --> Constraints???
+- Currency --> Multiply forex time series
+- Liquidity --> EDA?
+- BM and TE --> ??
 
+
+??? What others (is this qualitative)
+- Vanguard Tech ETF
 
 
 ## 2. Security Analysis
@@ -177,20 +185,56 @@ heatmap(corrdata)
 ```{r}
 
 pSpec = portfolioSpec()
-setTargetReturn(pSpec) <- 0.045
-setSolver(pSpec) <- "solveRsocp"
+setTargetReturn(pSpec) <- (1.045)**(1/12)-1
 print(pSpec)
 
 ```
 ```{r}
 Constraints = c("minW=c(0,0,0,0,0,0,0,0,0)", "maxW=c(0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2)" )
-efficientPortfolio(data = as.timeSeries(returns[complete.cases(returns),]), spec =  pSpec)
+lppData = as.timeSeries(returns[complete.cases(returns),])
+ep = efficientPortfolio(data = lppData, spec =  pSpec, constraints=Constraints)
+ep
+```
+
+```{r}
+col <- seqPalette(ncol(lppData), "BuPu")
+weightsPie(ep, box = FALSE, col = col)
+mtext(text = "Tangency MV Portfolio", side = 3, line = 1.5,
+font = 2, cex = 0.7, adj = 0)
+weightedReturnsPie(ep, box = FALSE, col = col)
+mtext(text = "Tangency MV Portfolio", side = 3, line = 1.5,
+font = 2, cex = 0.7, adj = 0)
+covRiskBudgetsPie(ep, box = FALSE, col = col)
+mtext(text = "Tangency MV Portfolio", side = 3, line = 1.5,
+font = 2, cex = 0.7, adj = 0)
+
+
+
+```
+```{r}
+tgPortfolio = ep
+par(mfrow = c(2, 2))
+col <- rampPalette(ncol(lppData), "purple2green")
+weights <- 100 * as.vector(getWeights(tgPortfolio))
+weightedReturns <- weights * getMean(tgPortfolio)
+covRiskBudgets <- getCovRiskBudgets(tgPortfolio)
+names <- colnames(lppData)
+barplot(height = weights, names.arg = names, horiz = TRUE, las = 1, col = col)
+title(main = "Portfolio Weights", xlab = "Weights %")
+barplot(height = weightedReturns, names.arg = names, horiz = TRUE, las = 1, col = col)
+title(main = "Weighted Portfolio Returns", xlab = "Weighted Returns %")
+barplot(height = weights, names.arg = names, las = 1, col = col)
 
 
 
 ```
 ## 4. Portfolio Implementation
 
+```{r}
+BIV
+
+
+```
 
 ## 5. Portfolio Evaluation
 

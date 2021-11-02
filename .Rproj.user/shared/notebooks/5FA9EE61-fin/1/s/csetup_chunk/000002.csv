@@ -1,1 +1,13 @@
 "0","knitr::opts_chunk$set(warning = FALSE, message = FALSE) "
+"2","Warning messages:
+"
+"2","1: package ‘fPortfolio’ was built under R version 4.0.5 
+"
+"2","2: package ‘timeDate’ was built under R version 4.0.5 
+"
+"2","3: package ‘timeSeries’ was built under R version 4.0.5 
+"
+"2","4: package ‘fBasics’ was built under R version 4.0.5 
+"
+"2","5: package ‘fAssets’ was built under R version 4.0.5 
+"
