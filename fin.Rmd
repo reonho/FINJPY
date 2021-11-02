@@ -444,15 +444,14 @@ port
 
 ```{r}
 
-setNFrontierPoints(pSpec) <- 50
+setNFrontierPoints(pSpec) <- 20
 
 longFrontier <- portfolioFrontier(data = data, spec = pSpec)
 
 col = qualiPalette(30, "Set1")
-frontierPlot(longFrontier, return = "mean", risk = "Cov",auto = FALSE)
+tailoredFrontierPlot(longFrontier, return = "mean", risk = "Cov")
 grid()
 singleAssetPoints(longFrontier, col='red')
-twoAssetsLines(longFrontier, col='green')
 
 ```
 
@@ -460,6 +459,11 @@ twoAssetsLines(longFrontier, col='green')
 
 
 
+```{r}
+
+
+
+```
 
 
 
