@@ -146,6 +146,7 @@ Next, calculate Returns and Volatiliy ($\mu \ and \ \sigma$) for each of the ETF
 means = c()
 sds = c()
 returns = c()
+all_prices_monthly = c()
 for(i in seq(9)){
   ticker = tickers[i][[1]]
   prices_monthly <- to.monthly(ticker, name=name[i], indexAt = "lastof", OHLC = T)
@@ -153,6 +154,7 @@ for(i in seq(9)){
   returns = cbind(returns,return)
   means = c(means, mean(return, na.rm=T))
   sds = c(sds, sd(return, na.rm=T))
+  all_prices_monthly = cbind(all_prices_monthly, Ad(prices_monthly))
 }
 df = data.frame(unlist(name), means, sds)
 colnames(df) = c('ETF','Mu_Monthly', 'Sigma_Monthly')
@@ -171,13 +173,64 @@ heatmap(corrdata)
 ```
 ## 3. Portfolio Construction
 ```{r}
-returns
+# returns
 pSpec = portfolioSpec()
-setSolver(pSpec) <- "solveRshortExact"
+# setSolver(pSpec) <- "solveRshortExact"
+# annual_target = 0.05
+# (1+annual_target)**(1/12) - 1
+# setTargetReturn(pSpec) = (1+annual_target)**(1/12) - 1
 tangencyPortfolio(as.timeSeries(returns[complete.cases(returns),]))
 
 ```
+```{r}
+# Low: 0.0144, Med: 0.0289, High: 0.0722
 
+# Low Risk Portfolio
+pSpec = portfolioSpec()
+# setSolver(pSpec) <- "solveRglpk.MAD"
+annual_target = 0.065
+target_return = (1+annual_target)**(1/12) - 1
+# annual_risk = 0.05
+# target_risk = annual_risk/sqrt(12)
+# setTargetRisk(pSpec) = target_risk
+# setOptimize(pSpec) = 'maxReturn'
+setTargetReturn(pSpec) = target_return
+data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+
+port = efficientPortfolio(data=as.timeSeries(returns[complete.cases(returns),]), spec=pSpec)
+
+port
+```
+```{r}
+# Low: 0.0144, Med: 0.0289, High: 0.0722
+
+# Medium Risk Portfolio
+pSpec = portfolioSpec()
+annual_target = 0.11
+target_return = (1+annual_target)**(1/12) - 1
+
+setTargetReturn(pSpec) = target_return
+data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+
+port = efficientPortfolio(data=as.timeSeries(returns[complete.cases(returns),]), spec=pSpec)
+
+port
+```
+```{r}
+# Low: 0.0144, Med: 0.0289, High: 0.0722
+
+# High Risk Portfolio
+pSpec = portfolioSpec()
+annual_target = 0.2
+target_return = (1+annual_target)**(1/12) - 1
+
+setTargetReturn(pSpec) = target_return
+data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+
+port = efficientPortfolio(data=as.timeSeries(returns[complete.cases(returns),]), spec=pSpec)
+
+port
+```
 ## 4. Portfolio Implementation
 
 
@@ -186,4 +239,243 @@ tangencyPortfolio(as.timeSeries(returns[complete.cases(returns),]))
 
 ## 6. Portfolio Revisions
 
+### We consider a new candidate set of ETFs:
+- VTI Vanguard Total Stock Market ETF (VTI)
+- VEA Vanguard FTSE Developed Markets ETF
+- VGT	Vanguard Information Technology ETF 
+- XLF Financial Select Sector SPDR Fund 
+- XLV	Health Care Select Sector SPDR Fund	
+- XLE Energy Select Sector SPDR Fund
+- XLI Industrial Select Sector SPDR Fund
+- VNQ (Already in List)
+- XLY Consumer Discretionary Select Sector SPDR Fund
+- VAW Vanguard Materials ETF
+- XLP Consumer Staples Select Sector SPDR Fund
+- VPU Vanguard Utilities ETF
 
+
+These ETFs have been selected with the considerations of:
+
+- Focused on large cap companies to reduce systematic risk
+- Highly liquid with average daily trading volume above 100k
+- USD denominated to reduce the risk of forex
+- Diversification in ETF holdings and sectors (based on the 11 GICS sectors)
+- Diversification in terms of markets i.e. EM, US, bond
+
+
+```{r}
+new_etf= c(
+  'VTI',
+  'VEA',
+  'VGT',
+  'XLF',
+  'XLE',
+  'XLI',
+  'XLY',
+  'VAW',
+  'XLP',
+  'VPU'
+)
+
+benchmarks = c(
+  'CRSPTM1', # CRSP US Total Market Index, for VTI
+  'AD09', # FTSE Developed All Cap ex US Index, for VEA
+  'IXM', # Financial Select Sector Index
+  'IXV', # Healthcare Select Sector Index
+  'IXE', # Energy Select Sector Index
+  'IXI', # Industrial Select Sector Index
+  'IXY', # Consumer Discretionary Select Sector Index
+  'IXR', # Consumer Staples Select Sector Index
+  'IXU' # Utilities Select Sector Index
+  )
+
+
+
+getSymbols(new_etf, auto.assign=T)
+
+```
+```{r}
+new_tickers = list(VTI, VEA, VGT, XLF, XLE, XLI, XLY, VAW, XLP, VPU)
+new_name = new_etf
+
+t = VTI
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+t = VEA
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+t = VGT
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+t = XLF
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+t = XLE
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+t = XLI
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+t = XLY
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+t = VAW
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+t = XLP
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+t = VPU
+init.d <- index(t)[1] # first date
+e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
+plot(e, main=names(e))
+```
+```{r}
+new_means = c()
+new_sds = c()
+new_returns = c()
+for(i in seq(length(new_etf))){
+  ticker = new_tickers[i][[1]]
+  prices_monthly <- to.monthly(ticker, name=new_name[i], indexAt = "lastof", OHLC = T)
+  return <- ROC(Ad(prices_monthly))
+  new_returns = cbind(new_returns,return)
+  new_means = c(new_means, mean(return, na.rm=T))
+  new_sds = c(new_sds, sd(return, na.rm=T))
+}
+new_df = data.frame(unlist(new_name), new_means, new_sds)
+colnames(new_df) = c('ETF','Mu_Monthly', 'Sigma_Monthly')
+new_df
+```
+```{r}
+library(fPortfolio)
+library(purrr)
+new_returns = data.frame(new_returns)
+
+colnames(new_returns) <- unlist(map(colnames(new_returns), function(x){unlist(strsplit(x,'[.]'))[1]}))
+covdata = cov(new_returns, use = "complete.obs")
+
+corrdata = cor(new_returns, use='complete.obs')
+heatmap(corrdata)
+```
+```{r}
+all_returns = merge.xts(returns, new_returns)
+```
+```{r}
+
+data = portfolioData(as.timeSeries(all_returns[complete.cases(all_returns),]))
+port = tangencyPortfolio(data=data)
+
+port
+```
+```{r}
+# Low: 0.0144, Med: 0.0289, High: 0.0722
+# Low Risk Portfolio
+pSpec = portfolioSpec()
+annual_target = 0.077
+target_return = (1+annual_target)**(1/12) - 1
+# 
+setTargetReturn(pSpec) = target_return
+# data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+data = portfolioData(as.timeSeries(all_returns[complete.cases(all_returns),]))
+port = efficientPortfolio(data=data, spec=pSpec)
+
+port
+```
+```{r}
+# Low: 0.0144, Med: 0.0289, High: 0.0722
+# Medium Risk Portfolio
+pSpec = portfolioSpec()
+annual_target = 0.14
+target_return = (1+annual_target)**(1/12) - 1
+# 
+setTargetReturn(pSpec) = target_return
+# data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+data = portfolioData(as.timeSeries(all_returns[complete.cases(all_returns),]))
+port = efficientPortfolio(data=data, spec=pSpec, constraints=c('maxW[1:19]=0.2'))
+
+port
+```
+```{r}
+# Low: 0.0144, Med: 0.0289, High: 0.0722
+# High Risk Portfolio
+pSpec = portfolioSpec()
+annual_target = 0.16
+target_return = (1+annual_target)**(1/12) - 1
+# 
+setTargetReturn(pSpec) = target_return
+# data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+data = portfolioData(as.timeSeries(all_returns[complete.cases(all_returns),]))
+port = efficientPortfolio(data=data, spec=pSpec, constraints=c('maxW[1:19]=0.2'))
+
+port
+```
+# Experimentation with Target Risk and Short Selling (for screenshots)
+```{r}
+pSpec = portfolioSpec()
+annual_risk = 0.05
+target_risk = annual_risk/sqrt(12)
+setTargetRisk(pSpec) = target_risk
+data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+port = maxreturnPortfolio(data, spec=pSpec)
+
+port
+```
+```{r}
+pSpec = portfolioSpec()
+annual_risk = 0.1
+target_risk = annual_risk/sqrt(12)
+setTargetRisk(pSpec) = target_risk
+data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+port = maxreturnPortfolio(data, spec=pSpec)
+
+port
+```
+```{r}
+pSpec = portfolioSpec()
+annual_risk = 0.1
+target_risk = annual_risk/sqrt(12) #0.0289
+setSolver(pSpec) = 'solveRshortExact'
+setTargetRisk(pSpec) = target_risk
+data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+port = maxreturnPortfolio(data, spec=pSpec)
+print(target_risk)
+port
+```
+
+```{r}
+pSpec = portfolioSpec()
+annual_target = 0.1
+target_return = (1+annual_target)**(1/12) - 1 #0.00797
+setTargetReturn(pSpec) = target_return
+data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
+port = efficientPortfolio(data, spec=pSpec)
+print(target_return)
+port
+```
