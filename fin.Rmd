@@ -71,7 +71,7 @@ require(quantmod)
 
 ```{r}
 
-
+# ETF Data
 global_etf = c('BIV', # US INTERMEDIATE BOND
             'VCSH',# US INVESTMENT GRADE BOND
             'BNDX',# GLOBAL BOND ETF
@@ -90,8 +90,33 @@ au_etf = c('HVST.AX' #EQUITY DIVIDEND ETF AU (HVST AU)
 getSymbols(global_etf, auto.assign = T)
 getSymbols(j_etf, auto.assign = T, src='yahooj')
 getSymbols(au_etf, auto.assign = T)
+```
+
+
+```{r}
+# Exchange Rate Data
+library(priceR)
+usd_jpy = historical_exchange_rates('USD', to='JPY', start_date='2007-01-01', end_date='2021-11-03')
+usd_jpy = as.xts(usd_jpy$one_USD_equivalent_to_x_JPY, order.by=as.Date(usd_jpy$date))
+
+# Convert USA currency adjusted prices to JPY
+
+BIV$BIV.Adjusted = BIV$BIV.Adjusted * usd_jpy
+VCSH$VCSH.Adjusted = VCSH$VCSH.Adjusted * usd_jpy
+BNDX$BNDX.Adjusted = BNDX$BNDX.Adjusted * usd_jpy
+VNQ$BNQ.Adjusted = VNQ$VNQ.Adjusted * usd_jpy 
+VT$VT.Adjusted = VT$VT.Adjusted * usd_jpy
+SPY$SPY.Adjusted = SPY$SPY.Adjusted * usd_jpy
+
+aud_jpy = historical_exchange_rates('AUD', to='JPY', start_date='2007-01-01', end_date='2021-11-03')
+aud_jpy = as.xts(aud_jpy$one_AUD_equivalent_to_x_JPY, order.by=as.Date(aud_jpy$date))
+
+HVST.AX$HVST.AX.Adjusted = HVST.AX$HVST.AX.Adjusted * aud_jpy
 
 ```
+
+
+
 Find out characteristics of each of all the tickers.
 
 ### Plots
@@ -146,7 +171,6 @@ Next, calculate Returns and Volatiliy ($\mu \ and \ \sigma$) for each of the ETF
 means = c()
 sds = c()
 returns = c()
-all_prices_monthly = c()
 for(i in seq(9)){
   ticker = tickers[i][[1]]
   prices_monthly <- to.monthly(ticker, name=name[i], indexAt = "lastof", OHLC = T)
@@ -154,7 +178,6 @@ for(i in seq(9)){
   returns = cbind(returns,return)
   means = c(means, mean(return, na.rm=T))
   sds = c(sds, sd(return, na.rm=T))
-  all_prices_monthly = cbind(all_prices_monthly, Ad(prices_monthly))
 }
 df = data.frame(unlist(name), means, sds)
 colnames(df) = c('ETF','Mu_Monthly', 'Sigma_Monthly')
@@ -173,12 +196,7 @@ heatmap(corrdata)
 ```
 ## 3. Portfolio Construction
 ```{r}
-# returns
 pSpec = portfolioSpec()
-# setSolver(pSpec) <- "solveRshortExact"
-# annual_target = 0.05
-# (1+annual_target)**(1/12) - 1
-# setTargetReturn(pSpec) = (1+annual_target)**(1/12) - 1
 tangencyPortfolio(as.timeSeries(returns[complete.cases(returns),]))
 
 ```
@@ -277,27 +295,25 @@ new_etf= c(
   'VPU'
 )
 
-benchmarks = c(
-  'CRSPTM1', # CRSP US Total Market Index, for VTI
-  'AD09', # FTSE Developed All Cap ex US Index, for VEA
-  'IXM', # Financial Select Sector Index
-  'IXV', # Healthcare Select Sector Index
-  'IXE', # Energy Select Sector Index
-  'IXI', # Industrial Select Sector Index
-  'IXY', # Consumer Discretionary Select Sector Index
-  'IXR', # Consumer Staples Select Sector Index
-  'IXU' # Utilities Select Sector Index
-  )
-
-
-
 getSymbols(new_etf, auto.assign=T)
 
 ```
 ```{r}
+VTI$VTI.Adjusted = VTI$VTI.Adjusted * usd_jpy
+VEA$VEA.Adjusted = VEA$VEA.Adjusted * usd_jpy
+VGT$VGT.Adjusted = VGT$VGT.Adjusted * usd_jpy
+XLF$XLF.Adjusted = XLF$XLF.Adjusted * usd_jpy
+XLE$XLE.Adjusted = XLE$XLE.Adjusted * usd_jpy
+XLI$XLI.Adjusted = XLI$XLI.Adjusted * usd_jpy
+XLY$XLY.Adjusted = XLY$XLY.Adjusted * usd_jpy
+VAW$VAW.Adjusted = VAW$VAW.Adjusted * usd_jpy
+XLP$XLP.Adjusted = XLP$XLP.Adjusted * usd_jpy
+VPU$VPU.Adjusted = VPU$VPU.Adjusted * usd_jpy
+```
+
+```{r}
 new_tickers = list(VTI, VEA, VGT, XLF, XLE, XLI, XLY, VAW, XLP, VPU)
 new_name = new_etf
-
 t = VTI
 init.d <- index(t)[1] # first date
 e <- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
@@ -400,11 +416,10 @@ port
 # Low: 0.0144, Med: 0.0289, High: 0.0722
 # Low Risk Portfolio
 pSpec = portfolioSpec()
-annual_target = 0.077
+annual_target = 0.03
 target_return = (1+annual_target)**(1/12) - 1
-# 
+
 setTargetReturn(pSpec) = target_return
-# data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
 data = portfolioData(as.timeSeries(all_returns[complete.cases(all_returns),]))
 port = efficientPortfolio(data=data, spec=pSpec)
 
@@ -515,4 +530,17 @@ data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
 port = efficientPortfolio(data, spec=pSpec)
 print(target_return)
 port
+```
+```{r}
+
+mi = c()
+for (t in tickers) {
+  print(min(index(t)))
+  mi = c(mi, min(index(t)))
+
+}
+for (t in new_tickers) {
+  print(min(index(t)))
+  mi = c(mi, min(index(t)))
+}
 ```
