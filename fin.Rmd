@@ -32,6 +32,7 @@ Given the conditions described above, we choose to adopt the *Efficient Risk* or
 
 This means we minimise risk for a target level of return.
 
+<<<<<<< Updated upstream
 (OR find an objective function from here)
 https://pyportfolioopt.readthedocs.io/en/latest/MeanVariance.html 
 
@@ -42,11 +43,17 @@ Constraints:
 
 1. Long only
 2. Maximum weight of 20% per ETF
+=======
+For a start, maximise Sharpe:
+
+$min \ \sigma(R) \\ s.t. E(R) = R_{target}$
+>>>>>>> Stashed changes
 
 
 ### Amount
 As stated in the preamble, investable amount is **JPY 100,000**.
 
+<<<<<<< Updated upstream
 ### Choice of Assets
 
 We start with the basket of ETFs provided
@@ -70,6 +77,8 @@ We start with the basket of ETFs provided
 
 ??? What others (is this qualitative)
 - Vanguard Tech ETF
+=======
+>>>>>>> Stashed changes
 
 
 ## 2. Security Analysis
@@ -82,8 +91,13 @@ require(quantmod)
 ```
 
 ```{r}
+<<<<<<< Updated upstream
 
 
+=======
+#new universe 
+# ETF Data
+>>>>>>> Stashed changes
 global_etf = c('BIV', # US INTERMEDIATE BOND
             'VCSH',# US INVESTMENT GRADE BOND
             'BNDX',# GLOBAL BOND ETF
@@ -92,16 +106,61 @@ global_etf = c('BIV', # US INTERMEDIATE BOND
             'SPY' #US STOCK (SPDR)
 )
 
-j_etf = c('1343.T',  # JREIT (JP 1343)
-          '1555.T' # AU REIT (JP 1555)
+j_etf = c('1328.T','1343.T')
+
+new_etf_universe= c(
+  'VTI',
+  'VEA',
+  'VGT',
+  'XLF',
+  'XLE',
+  'XLY',
+  'VAW',
+  'GLD',
+  'REM',
+  'IVLU',
+  'VWOB',
+  'PDBC',
+  'GSG',
+  'BIV', # US INTERMEDIATE BOND
+  'VCSH',# US INVESTMENT GRADE BON
+  'BNDX',# GLOBAL BOND ETF
+  'VNQ', #US REIT
+  'SPY', #US STOCK (SPDR)
+  '1615.T',
+  'DXJ'
 )
-           
-au_etf = c('HVST.AX' #EQUITY DIVIDEND ETF AU (HVST AU)
-)
+
             
-getSymbols(global_etf, auto.assign = T)
+getSymbols(new_etf_universe, auto.assign = T)
 getSymbols(j_etf, auto.assign = T, src='yahooj')
+<<<<<<< Updated upstream
 getSymbols(au_etf, auto.assign = T)
+=======
+
+```
+
+
+```{r}
+# Exchange Rate Data
+library(priceR)
+usd_jpy = historical_exchange_rates('USD', to='JPY', start_date='2007-01-01', end_date='2021-11-03')
+usd_jpy = as.xts(usd_jpy$one_USD_equivalent_to_x_JPY, order.by=as.Date(usd_jpy$date))
+
+# Convert USA currency adjusted prices to JPY
+
+BIV$BIV.Adjusted = BIV$BIV.Adjusted * usd_jpy
+VCSH$VCSH.Adjusted = VCSH$VCSH.Adjusted * usd_jpy
+BNDX$BNDX.Adjusted = BNDX$BNDX.Adjusted * usd_jpy
+VNQ$BNQ.Adjusted = VNQ$VNQ.Adjusted * usd_jpy 
+VT$VT.Adjusted = VT$VT.Adjusted * usd_jpy
+SPY$SPY.Adjusted = SPY$SPY.Adjusted * usd_jpy
+
+aud_jpy = historical_exchange_rates('AUD', to='JPY', start_date='2007-01-01', end_date='2021-11-03')
+aud_jpy = as.xts(aud_jpy$one_AUD_equivalent_to_x_JPY, order.by=as.Date(aud_jpy$date))
+
+HVST.AX$HVST.AX.Adjusted = HVST.AX$HVST.AX.Adjusted * aud_jpy
+>>>>>>> Stashed changes
 
 ```
 Find out characteristics of each of all the tickers.

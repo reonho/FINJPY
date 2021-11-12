@@ -1746,9 +1746,7 @@ pre code {
 </div>
 
 
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-text-begin -->
+<p><code>{r setup, include=FALSE}  knitr::opts_chunk$set(warning = FALSE, message = FALSE)</code></p>
 <p>This notebook quantifies the analysis we conducted to arrive at our optimal asset allocations.</p>
 <div id="determine-investment-policy" class="section level2">
 <h2>1. Determine Investment Policy</h2>
@@ -1761,297 +1759,28 @@ pre code {
 <div id="objective-function" class="section level3">
 <h3>Objective Function</h3>
 <p>Given the conditions described above, we choose to adopt the <em>Efficient Risk</em> or <em>Markowitz Portfolio</em></p>
-<<<<<<< Updated upstream
-<p>This means we minimise risk for a target level of return.</p>
-<p>(OR find an objective function from here) <a href="https://pyportfolioopt.readthedocs.io/en/latest/MeanVariance.html" class="uri">https://pyportfolioopt.readthedocs.io/en/latest/MeanVariance.html</a></p>
-<p>Target Return: Global Average Inflation + 1% = 4.5% <a href="https://www.statista.com/statistics/256598/global-inflation-rate-compared-to-previous-year/" class="uri">https://www.statista.com/statistics/256598/global-inflation-rate-compared-to-previous-year/</a></p>
-<p>Constraints:</p>
-<ol style="list-style-type: decimal">
-<li>Long only</li>
-<li>Maximum weight of 20% per ETF</li>
-</ol>
-=======
 <p><strong>Fix Return and Minimise Risk</strong></p>
-<p>For a start, maximise Sharpe:</p>
 <p><span class="math inline">\(min \ \sigma(R) \\ s.t. E(R) = R_{target}\)</span></p>
->>>>>>> Stashed changes
 </div>
 <div id="amount" class="section level3">
 <h3>Amount</h3>
 <p>As stated in the preamble, investable amount is <strong>JPY 100,000</strong>.</p>
 </div>
-<<<<<<< Updated upstream
-<div id="choice-of-assets" class="section level3">
-<h3>Choice of Assets</h3>
-<p>We start with the basket of ETFs provided</p>
-<ul>
-<li>BIV: US INTERMEDIATE BOND</li>
-<li>VCSH: US INVESTMENT GRADE BOND</li>
-<li>BNDX: GLOBAL BOND ETF</li>
-<li>VNQ: US REIT</li>
-<li>JP 1343: JREIT</li>
-<li>JP 1555: AU REIT</li>
-<li>SPDR: US STOCK</li>
-<li>VT: GLOBAL STOCK</li>
-<li>HVST AU: EQUITY DIVIDEND ETF AU</li>
-</ul>
-</div>
-=======
->>>>>>> Stashed changes
 </div>
 <div id="security-analysis" class="section level2">
 <h2>2. Security Analysis</h2>
-<p>Pull data for tickers described above.</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI2luc3RhbGwgcXVhbnRtb2QsIHhtbDJcbnJlcXVpcmUocXVhbnRtb2QpXG5cbmBgYCJ9 -->
-<pre class="r"><code>#install quantmod, xml2
-require(quantmod)
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<<<<<<< Updated upstream
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5cbmdsb2JhbF9ldGYgPSBjKCdCSVYnLCAjIFVTIElOVEVSTUVESUFURSBCT05EXG4gICAgICAgICAgICAnVkNTSCcsIyBVUyBJTlZFU1RNRU5UIEdSQURFIEJPTkRcbiAgICAgICAgICAgICdCTkRYJywjIEdMT0JBTCBCT05EIEVURlxuICAgICAgICAgICAgJ1ZOUScsICNVUyBSRUlUXG4gICAgICAgICAgICAnVlQnLCAjR0xPQkFMIFNUT0NLJ1xuICAgICAgICAgICAgJ1NQWScgI1VTIFNUT0NLIChTUERSKVxuKVxuXG5qX2V0ZiA9IGMoJzEzNDMuVCcsICAjIEpSRUlUIChKUCAxMzQzKVxuICAgICAgICAgICcxNTU1LlQnICMgQVUgUkVJVCAoSlAgMTU1NSlcbilcbiAgICAgICAgICAgXG5hdV9ldGYgPSBjKCdIVlNULkFYJyAjRVFVSVRZIERJVklERU5EIEVURiBBVSAoSFZTVCBBVSlcbilcbiAgICAgICAgICAgIFxuZ2V0U3ltYm9scyhnbG9iYWxfZXRmLCBhdXRvLmFzc2lnbiA9IFQpXG5nZXRTeW1ib2xzKGpfZXRmLCBhdXRvLmFzc2lnbiA9IFQsIHNyYz0neWFob29qJylcbmdldFN5bWJvbHMoYXVfZXRmLCBhdXRvLmFzc2lnbiA9IFQpXG5cbmBgYCJ9 -->
-<pre class="r"><code>
+<p>Pull data for ticker described above and exchange rates for currency conversion.</p>
+<pre class="{r}"><code>require(quantmod)
+require(priceR)</code></pre>
+<pre class="{r}"><code>#USA Denominated
 
-global_etf = c(&#39;BIV&#39;, # US INTERMEDIATE BOND
-            &#39;VCSH&#39;,# US INVESTMENT GRADE BOND
-            &#39;BNDX&#39;,# GLOBAL BOND ETF
-            &#39;VNQ&#39;, #US REIT
-            &#39;VT&#39;, #GLOBAL STOCK&#39;
-            &#39;SPY&#39; #US STOCK (SPDR)
-)
-
-j_etf = c(&#39;1343.T&#39;,  # JREIT (JP 1343)
-          &#39;1555.T&#39; # AU REIT (JP 1555)
-)
-           
-au_etf = c(&#39;HVST.AX&#39; #EQUITY DIVIDEND ETF AU (HVST AU)
-)
-            
-getSymbols(global_etf, auto.assign = T)
-getSymbols(j_etf, auto.assign = T, src=&#39;yahooj&#39;)
-getSymbols(au_etf, auto.assign = T)
-=======
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2V0U3ltYm9scyhqX2V0ZiwgYXV0by5hc3NpZ24gPSBULCBzcmM9J3lhaG9vaicpXG5cbmBgYCJ9 -->
-<pre class="r"><code>getSymbols(j_etf, auto.assign = T, src=&#39;yahooj&#39;)
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiMTYxNS5UXCJcbiJ9 -->
-<pre><code>[1] &quot;1615.T&quot;</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZ2V0U3ltYm9scyhqX2V0ZiwgYXV0by5hc3NpZ24gPSBULCBzcmM9J3lhaG9vaicpXG5gYGAifQ== -->
-<pre class="r"><code>getSymbols(j_etf, auto.assign = T, src=&#39;yahooj&#39;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiMTYxNS5UXCJcbiJ9 -->
-<pre><code>[1] &quot;1615.T&quot;</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubmV3X2V0Zl91bml2ZXJzZT0gYyhcbiAgJ1ZUSScsXG4gICdWRUEnLFxuICAnVkdUJyxcbiAgJ1hMRicsXG4gICdYTEUnLFxuICAnWExZJyxcbiAgJ1ZBVycsXG4gICdHTEQnLFxuICAnUkVNJyxcbiAgJ0lWTFUnLFxuICAnVldPQicsXG4gICdQREJDJyxcbiAgJ0dTRycsXG4gICdCSVYnLCAjIFVTIElOVEVSTUVESUFURSBCT05EXG4gICdWQ1NIJywjIFVTIElOVkVTVE1FTlQgR1JBREUgQk9OXG4gICdCTkRYJywjIEdMT0JBTCBCT05EIEVURlxuICAnVk5RJywgI1VTIFJFSVRcbiAgJ1NQWScgI1VTIFNUT0NLIChTUERSKVxuKVxuXG4gICAgICAgICAgICBcbmdldFN5bVxuYGBgIn0= -->
-<pre class="r"><code>new_etf_universe= c(
-  &#39;VTI&#39;,
-  &#39;VEA&#39;,
-  &#39;VGT&#39;,
-  &#39;XLF&#39;,
-  &#39;XLE&#39;,
-  &#39;XLY&#39;,
-  &#39;VAW&#39;,
-  &#39;GLD&#39;,
-  &#39;REM&#39;,
-  &#39;IVLU&#39;,
-  &#39;VWOB&#39;,
-  &#39;PDBC&#39;,
-  &#39;GSG&#39;,
+us_etf = c(
   &#39;BIV&#39;, # US INTERMEDIATE BOND
-  &#39;VCSH&#39;,# US INVESTMENT GRADE BON
+  &#39;VCSH&#39;,# US INVESTMENT GRADE BOND
   &#39;BNDX&#39;,# GLOBAL BOND ETF
   &#39;VNQ&#39;, #US REIT
-  &#39;SPY&#39; #US STOCK (SPDR)
-)
-
-            
-getSym</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3I6IG9iamVjdCAnZ2V0U3ltJyBub3QgZm91bmRcbiJ9 -->
-<pre><code>Error: object &#39;getSym&#39; not found</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFeGNoYW5nZSBSYXRlIERhdGFcbmxpYnJhcnkocHJpY2VSKVxudXNkX2pweSA9IGhpc3RvcmljYWxfZXhjaGFuZ2VfcmF0ZXMoJ1VTRCcsIHRvPSdKUFknLCBzdGFydF9kYXRlPScyMDA3LTAxLTAxJywgZW5kX2RhdGU9JzIwMjEtMTEtMDMnKVxudXNkX2pweSA9IGFzLnh0cyh1c2RfanB5JG9uZV9VU0RfZXF1aXZhbGVudF90b194X0pQWSwgb3JkZXIuYnk9YXMuRGF0ZSh1c2RfanB5JGRhdGUpKVxuXG4jIENvbnZlcnQgVVNBIGN1cnJlbmN5IGFkanVzdGVkIHByaWNlcyB0byBKUFlcblxuQklWJEJJVi5BZGp1c3RlZCA9IEJJViRCSVYuQWRqdXN0ZWQgKiB1c2RfanB5XG5WQ1NIJFZDU0guQWRqdXN0ZWQgPSBWQ1NIJFZDU0guQWRqdXN0ZWQgKiB1c2RfanB5XG5CTkRYJEJORFguQWRqdXN0ZWQgPSBCTkRYJEJORFguQWRqdXN0ZWQgKiB1c2RfanB5XG5WTlEkQk5RLkFkanVzdGVkID0gVk5RJFZOUS5BZGp1c3RlZCAqIHVzZF9qcHkgXG5WVCRWVC5BZGp1c3RlZCA9IFZUJFZULkFkanVzdGVkICogdXNkX2pweVxuU1BZJFNQWS5BZGp1c3RlZCA9IFNQWSRTUFkuQWRqdXN0ZWQgKiB1c2RfanB5XG5cbmF1ZF9qcHkgPSBoaXN0b3JpY2FsX2V4Y2hhbmdlX3JhdGVzKCdBVUQnLCB0bz0nSlBZJywgc3RhcnRfZGF0ZT0nMjAwNy0wMS0wMScsIGVuZF9kYXRlPScyMDIxLTExLTAzJylcbmF1ZF9qcHkgPSBhcy54dHMoYXVkX2pweSRvbmVfQVVEX2VxdWl2YWxlbnRfdG9feF9KUFksIG9yZGVyLmJ5PWFzLkRhdGUoYXVkX2pweSRkYXRlKSlcblxuSFZTVC5BWCRIVlNULkFYLkFkanVzdGVkID0gSFZTVC5BWCRIVlNULkFYLkFkanVzdGVkICogYXVkX2pweVxuXG5gYGAifQ== -->
-<pre class="r"><code># Exchange Rate Data
-library(priceR)
-usd_jpy = historical_exchange_rates(&#39;USD&#39;, to=&#39;JPY&#39;, start_date=&#39;2007-01-01&#39;, end_date=&#39;2021-11-03&#39;)
-usd_jpy = as.xts(usd_jpy$one_USD_equivalent_to_x_JPY, order.by=as.Date(usd_jpy$date))
-
-# Convert USA currency adjusted prices to JPY
-
-BIV$BIV.Adjusted = BIV$BIV.Adjusted * usd_jpy
-VCSH$VCSH.Adjusted = VCSH$VCSH.Adjusted * usd_jpy
-BNDX$BNDX.Adjusted = BNDX$BNDX.Adjusted * usd_jpy
-VNQ$BNQ.Adjusted = VNQ$VNQ.Adjusted * usd_jpy 
-VT$VT.Adjusted = VT$VT.Adjusted * usd_jpy
-SPY$SPY.Adjusted = SPY$SPY.Adjusted * usd_jpy
-
-aud_jpy = historical_exchange_rates(&#39;AUD&#39;, to=&#39;JPY&#39;, start_date=&#39;2007-01-01&#39;, end_date=&#39;2021-11-03&#39;)
-aud_jpy = as.xts(aud_jpy$one_AUD_equivalent_to_x_JPY, order.by=as.Date(aud_jpy$date))
-
-HVST.AX$HVST.AX.Adjusted = HVST.AX$HVST.AX.Adjusted * aud_jpy
->>>>>>> Stashed changes
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>Find out characteristics of each of all the tickers.</p>
-<div id="plots" class="section level3">
-<h3>Plots</h3>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGlja2VycyA9IGxpc3QoQklWLFZDU0gsQk5EWCxWTlEsVlQsU1BZLGBZSjEzNDMuVGAsYFlKMTU1NS5UYCxIVlNULkFYKVxubmFtZSA9IGxpc3QoJ0JJVicsJ1ZDU0gnLCdCTkRYJywnVk5RJywnVlQnLCdTUFknLCdZSjEzNDMuVCcsJ1lKMTU1NS5UJywnSFZTVC5BWCcpXG5cbnQgPSBCSVZcbmluaXQuZCA8LSBpbmRleCh0KVsxXVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pXG5wbG90KGUsIG1haW49bmFtZXMoZSkpXG50ID0gVkNTSFxuaW5pdC5kIDwtIGluZGV4KHQpWzFdXG5lIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSlcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbnQgPSBCTkRYXG5pbml0LmQgPC0gaW5kZXgodClbMV1cbmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKVxucGxvdChlLCBtYWluPW5hbWVzKGUpKVxudCA9IFZOUVxuaW5pdC5kIDwtIGluZGV4KHQpWzFdXG5lIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSlcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbnQgPSBWVFxuaW5pdC5kIDwtIGluZGV4KHQpWzFdXG5lIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSlcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbnQgPSBTUFlcbmluaXQuZCA8LSBpbmRleCh0KVsxXVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pXG5wbG90KGUsIG1haW49bmFtZXMoZSkpXG50ID0gYFlKMTM0My5UYFxuaW5pdC5kIDwtIGluZGV4KHQpWzFdXG5lIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSlcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbnQgPSBgWUoxNTU1LlRgXG5pbml0LmQgPC0gaW5kZXgodClbMV1cbmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKVxucGxvdChlLCBtYWluPW5hbWVzKGUpKVxudCA9IGBIVlNULkFYYFxuaW5pdC5kIDwtIGluZGV4KHQpWzFdXG5lIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSlcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>tickers = list(BIV,VCSH,BNDX,VNQ,VT,SPY,`YJ1343.T`,`YJ1555.T`,HVST.AX)
-name = list(&#39;BIV&#39;,&#39;VCSH&#39;,&#39;BNDX&#39;,&#39;VNQ&#39;,&#39;VT&#39;,&#39;SPY&#39;,&#39;YJ1343.T&#39;,&#39;YJ1555.T&#39;,&#39;HVST.AX&#39;)
-
-t = BIV
-init.d &lt;- index(t)[1]
-e &lt;- t[, 6]/as.numeric(t[init.d, 6])
-plot(e, main=names(e))
-t = VCSH
-init.d &lt;- index(t)[1]
-e &lt;- t[, 6]/as.numeric(t[init.d, 6])
-plot(e, main=names(e))
-t = BNDX
-init.d &lt;- index(t)[1]
-e &lt;- t[, 6]/as.numeric(t[init.d, 6])
-plot(e, main=names(e))
-t = VNQ
-init.d &lt;- index(t)[1]
-e &lt;- t[, 6]/as.numeric(t[init.d, 6])
-plot(e, main=names(e))
-t = VT
-init.d &lt;- index(t)[1]
-e &lt;- t[, 6]/as.numeric(t[init.d, 6])
-plot(e, main=names(e))
-t = SPY
-init.d &lt;- index(t)[1]
-e &lt;- t[, 6]/as.numeric(t[init.d, 6])
-plot(e, main=names(e))
-t = `YJ1343.T`
-init.d &lt;- index(t)[1]
-e &lt;- t[, 6]/as.numeric(t[init.d, 6])
-plot(e, main=names(e))
-t = `YJ1555.T`
-init.d &lt;- index(t)[1]
-e &lt;- t[, 6]/as.numeric(t[init.d, 6])
-plot(e, main=names(e))
-t = `HVST.AX`
-init.d &lt;- index(t)[1]
-e &lt;- t[, 6]/as.numeric(t[init.d, 6])
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-<div id="returns" class="section level3">
-<h3>Returns</h3>
-<p>Next, calculate Returns and Volatiliy (<span class="math inline">\(\mu \ and \ \sigma\)</span>) for each of the ETFs</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubWVhbnMgPSBjKClcbnNkcyA9IGMoKVxucmV0dXJucyA9IGMoKVxuZm9yKGkgaW4gc2VxKDkpKXtcbiAgdGlja2VyID0gdGlja2Vyc1tpXVtbMV1dXG4gIHByaWNlc19tb250aGx5IDwtIHRvLm1vbnRobHkodGlja2VyLCBuYW1lPW5hbWVbaV0sIGluZGV4QXQgPSBcImxhc3RvZlwiLCBPSExDID0gVClcbiAgcmV0dXJuIDwtIFJPQyhBZChwcmljZXNfbW9udGhseSkpXG4gIHJldHVybnMgPSBjYmluZChyZXR1cm5zLHJldHVybilcbiAgbWVhbnMgPSBjKG1lYW5zLCBtZWFuKHJldHVybiwgbmEucm09VCkpXG4gIHNkcyA9IGMoc2RzLCBzZChyZXR1cm4sIG5hLnJtPVQpKVxufVxuZGYgPSBkYXRhLmZyYW1lKHVubGlzdChuYW1lKSwgbWVhbnMsIHNkcylcbmNvbG5hbWVzKGRmKSA9IGMoJ0VURicsJ011X01vbnRobHknLCAnU2lnbWFfTW9udGhseScpXG5kZlxuYGBgIn0= -->
-<pre class="r"><code>means = c()
-sds = c()
-returns = c()
-for(i in seq(9)){
-  ticker = tickers[i][[1]]
-  prices_monthly &lt;- to.monthly(ticker, name=name[i], indexAt = &quot;lastof&quot;, OHLC = T)
-  return &lt;- ROC(Ad(prices_monthly))
-  returns = cbind(returns,return)
-  means = c(means, mean(return, na.rm=T))
-  sds = c(sds, sd(return, na.rm=T))
-}
-df = data.frame(unlist(name), means, sds)
-colnames(df) = c(&#39;ETF&#39;,&#39;Mu_Monthly&#39;, &#39;Sigma_Monthly&#39;)
-df</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShmUG9ydGZvbGlvKVxubGlicmFyeShwdXJycilcbnJldHVybnMgPSBkYXRhLmZyYW1lKHJldHVybnMpXG5cbmNvbG5hbWVzKHJldHVybnMpIDwtIHVubGlzdChtYXAoY29sbmFtZXMocmV0dXJucyksIGZ1bmN0aW9uKHgpe3VubGlzdChzdHJzcGxpdCh4LCdbLl0nKSlbMV19KSlcbmNvdmRhdGEgPSBjb3YocmV0dXJucywgdXNlID0gXCJjb21wbGV0ZS5vYnNcIilcblxuY29ycmRhdGEgPSBjb3IocmV0dXJucywgdXNlPSdjb21wbGV0ZS5vYnMnKVxuaGVhdG1hcChjb3JyZGF0YSlcbmBgYCJ9 -->
-<pre class="r"><code>library(fPortfolio)
-library(purrr)
-returns = data.frame(returns)
-
-colnames(returns) &lt;- unlist(map(colnames(returns), function(x){unlist(strsplit(x,&#39;[.]&#39;))[1]}))
-covdata = cov(returns, use = &quot;complete.obs&quot;)
-
-corrdata = cor(returns, use=&#39;complete.obs&#39;)
-heatmap(corrdata)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-</div>
-<div id="portfolio-construction" class="section level2">
-<h2>3. Portfolio Construction</h2>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<<<<<<< Updated upstream
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudGFuZ2VuY3lQb3J0Zm9saW8oYXMudGltZVNlcmllcyhyZXR1cm5zW2NvbXBsZXRlLmNhc2VzKHJldHVybnMpLF0pLCBwU3BlYywgQ29uc3RyYWludHMpXG5cbmBgYCJ9 -->
-<pre class="r"><code>tangencyPortfolio(as.timeSeries(returns[complete.cases(returns),]), pSpec, Constraints)
-</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5UaXRsZTpcbiBNViBUYW5nZW5jeSBQb3J0Zm9saW8gXG4gRXN0aW1hdG9yOiAgICAgICAgIGNvdkVzdGltYXRvciBcbiBTb2x2ZXI6ICAgICAgICAgICAgc29sdmVSc2hvcnRFeGFjdCBcbiBPcHRpbWl6ZTogICAgICAgICAgbWluUmlzayBcbiBDb25zdHJhaW50czogICAgICAgbWluVyBtYXhXIFxuXG5Qb3J0Zm9saW8gV2VpZ2h0czpcbiAgICBCSVYgICAgVkNTSCAgICBCTkRYICAgICBWTlEgICAgICBWVCAgICAgU1BZICBZSjEzNDMgIFlKMTU1NSAgICBIVlNUIFxuLTAuMzM2OSAgMC45MTk0ICAwLjU4OTMgLTAuMDQzMCAtMC4yMzQ4ICAwLjQyOTEgLTAuMDE4NiAtMC4wNzIyIC0wLjIzMjIgXG5cbkNvdmFyaWFuY2UgUmlzayBCdWRnZXRzOlxuICAgIEJJViAgICBWQ1NIICAgIEJORFggICAgIFZOUSAgICAgIFZUICAgICBTUFkgIFlKMTM0MyAgWUoxNTU1ICAgIEhWU1QgXG4tMC4xNDkzICAwLjMwOTkgIDAuMjM4MSAtMC4wNDQ0IC0wLjI5MTEgIDAuNzA2MCAtMC4wMDY4IC0wLjAyMzAgIDAuMjYwNiBcblxuVGFyZ2V0IFJldHVybnMgYW5kIFJpc2tzOlxuICBtZWFuICAgIENvdiAgIENWYVIgICAgVmFSIFxuMC4wMDY1IDAuMDA3OSAwLjAwNzUgMC4wMDUxIFxuXG5EZXNjcmlwdGlvbjpcbiBTYXQgT2N0IDE2IDE3OjMzOjI1IDIwMjEgYnkgdXNlcjogcmVvbmggXG4ifQ== -->
-<pre><code>
-Title:
- MV Tangency Portfolio 
- Estimator:         covEstimator 
- Solver:            solveRshortExact 
- Optimize:          minRisk 
- Constraints:       minW maxW 
-
-Portfolio Weights:
-    BIV    VCSH    BNDX     VNQ      VT     SPY  YJ1343  YJ1555    HVST 
--0.3369  0.9194  0.5893 -0.0430 -0.2348  0.4291 -0.0186 -0.0722 -0.2322 
-
-Covariance Risk Budgets:
-    BIV    VCSH    BNDX     VNQ      VT     SPY  YJ1343  YJ1555    HVST 
--0.1493  0.3099  0.2381 -0.0444 -0.2911  0.7060 -0.0068 -0.0230  0.2606 
-
-Target Returns and Risks:
-  mean    Cov   CVaR    VaR 
-0.0065 0.0079 0.0075 0.0051 
-
-Description:
- Sat Oct 16 17:33:25 2021 by user: reonh </code></pre>
-<!-- rnb-output-end -->
-=======
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucFNwZWMgPSBwb3J0Zm9saW9TcGVjKClcbnRhbmdlbmN5UG9ydGZvbGlvKGFzLnRpbWVTZXJpZXMocmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhyZXR1cm5zKSxdKSlcblxuYGBgIn0= -->
-<pre class="r"><code>pSpec = portfolioSpec()
-tangencyPortfolio(as.timeSeries(returns[complete.cases(returns),]))
-</code></pre>
-<!-- rnb-source-end -->
->>>>>>> Stashed changes
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-<div id="portfolio-implementation" class="section level2">
-<h2>4. Portfolio Implementation</h2>
-</div>
-<div id="portfolio-evaluation" class="section level2">
-<h2>5. Portfolio Evaluation</h2>
-</div>
-<div id="portfolio-revisions" class="section level2">
-<h2>6. Portfolio Revisions</h2>
-<!-- rnb-text-end -->
-<<<<<<< Updated upstream
-</div>
-
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkJUMjIwMSBGaW5hbmNlIFByb2plY3QgTm90ZWJvb2siDQpvdXRwdXQ6DQogIGh0bWxfbm90ZWJvb2s6IGRlZmF1bHQNCiAgaHRtbF9kb2N1bWVudDoNCiAgICBkZl9wcmludDogcGFnZWQNCiAgcGRmX2RvY3VtZW50OiBkZWZhdWx0DQotLS0NCg0KYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9IA0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KHdhcm5pbmcgPSBGQUxTRSwgbWVzc2FnZSA9IEZBTFNFKSANCmBgYA0KDQpUaGlzIG5vdGVib29rIHF1YW50aWZpZXMgdGhlIGFuYWx5c2lzIHdlIGNvbmR1Y3RlZCB0byBhcnJpdmUgYXQgb3VyIG9wdGltYWwgYXNzZXQgYWxsb2NhdGlvbnMuDQoNCg0KIyMgMS4gRGV0ZXJtaW5lIEludmVzdG1lbnQgUG9saWN5DQoNCldoaWNoIHByb2R1Y3RzIHNob3VsZCBiZSBvZmZlcmVkIHRvIGEgdHlwaWNhbCBKYXBhbmVzZSByZXRhaWwgaW52ZXN0b3INCg0KDQojIyMgUmlzayBBcHBldGl0ZQ0KDQpUaGUgdHlwaWNhbCBKYXBhbmVzZSByZXRhaWwgaW52ZXN0b3IgaXMgcmlzayBhdmVyc2UuIE1hbnkgb2xkZXIgSmFwYW5lc2UgaW52ZXN0b3JzIGxpdmVkIHRocm91Z2ggdGhlIEFzaWFuIEZpbmFuY2lhbCBDcmlzaXMgd2hpY2ggc2F3IGEgaHVnZSBhc3NldCBidWJibGUgYW5kIHN1YnNlcXVlbnQgY3Jhc2ggaW4gSmFwYW5lc2UgZmluYW5jaWFsIG1hcmtldHMuIFRob3NlIHdobyBpbnZlc3RlZCBtb25leSByaWdodCBhdCB0aGUgcGVhayBvZiB0aGUgYXNzZXQgYnViYmxlIHdvdWxkIGhhdmUgbG9zdCBhIGNvbnNpZGVyYWJsZSBhbW91bnQgb2YgbW9uZXkuIEphcGFuIGFsc28gZW50ZXJlZCBtYW55IHllYXJzIG9mIGRlZmxhdGlvbiBhZnRlcndhcmRzLg0KDQpUaGVyZWZvcmUsIGEgdHlwaWNhbCBKYXBhbmVzZSByZXRhaWwgaW52ZXN0b3IgaXMgZGlzdGluY3QgZnJvbSBhbiBBbWVyaWNhbiBvciBFdXJvcGVhbiByZXRhaWwgaW52ZXN0b3IgaW4gdGhhdCB0aGV5IGhhdmUgZXhwZXJpZW5jZWQgbW9yZSBtYXJrZXQgZG93bnNpZGUgYW5kIGxlc3MgZWNvbm9taWMgZXVwaG9yaWEuIFdlIGV4cGVjdCB0aGF0IHRoZXkgd2lsbCBoYXZlIGEgbW9yZSBjb25zZXJ2YXRpdmUgcmlzayBhcHBldGl0ZSBhbmQgbGVzcyB0b2xlcmFuY2UgZm9yIHBvcnRmb2xpbyBkcmF3ZG93bi4NCg0KDQojIyMgT2JqZWN0aXZlIEZ1bmN0aW9uDQoNCkdpdmVuIHRoZSBjb25kaXRpb25zIGRlc2NyaWJlZCBhYm92ZSwgd2UgY2hvb3NlIHRvIGFkb3B0IHRoZSAqRWZmaWNpZW50IFJpc2sqIG9yICpNYXJrb3dpdHogUG9ydGZvbGlvKg0KDQpUaGlzIG1lYW5zIHdlIG1pbmltaXNlIHJpc2sgZm9yIGEgdGFyZ2V0IGxldmVsIG9mIHJldHVybi4NCg0KKE9SIGZpbmQgYW4gb2JqZWN0aXZlIGZ1bmN0aW9uIGZyb20gaGVyZSkNCmh0dHBzOi8vcHlwb3J0Zm9saW9vcHQucmVhZHRoZWRvY3MuaW8vZW4vbGF0ZXN0L01lYW5WYXJpYW5jZS5odG1sIA0KDQpUYXJnZXQgUmV0dXJuOiBHbG9iYWwgQXZlcmFnZSBJbmZsYXRpb24gKyAxJSA9IDQuNSUNCmh0dHBzOi8vd3d3LnN0YXRpc3RhLmNvbS9zdGF0aXN0aWNzLzI1NjU5OC9nbG9iYWwtaW5mbGF0aW9uLXJhdGUtY29tcGFyZWQtdG8tcHJldmlvdXMteWVhci8NCg0KQ29uc3RyYWludHM6DQoNCjEuIExvbmcgb25seQ0KMi4gTWF4aW11bSB3ZWlnaHQgb2YgMjAlIHBlciBFVEYNCg0KDQojIyMgQW1vdW50DQpBcyBzdGF0ZWQgaW4gdGhlIHByZWFtYmxlLCBpbnZlc3RhYmxlIGFtb3VudCBpcyAqKkpQWSAxMDAsMDAwKiouDQoNCiMjIyBDaG9pY2Ugb2YgQXNzZXRzDQoNCldlIHN0YXJ0IHdpdGggdGhlIGJhc2tldCBvZiBFVEZzIHByb3ZpZGVkDQoNCi0gQklWOiBVUyBJTlRFUk1FRElBVEUgQk9ORA0KLSBWQ1NIOiBVUyBJTlZFU1RNRU5UIEdSQURFIEJPTkQNCi0gQk5EWDogR0xPQkFMIEJPTkQgRVRGDQotIFZOUTogVVMgUkVJVA0KLSBKUCAxMzQzOiBKUkVJVA0KLSBKUCAxNTU1OiBBVSBSRUlUDQotIFNQRFI6IFVTIFNUT0NLDQotIFZUOiBHTE9CQUwgU1RPQ0sNCi0gSFZTVCBBVTogRVFVSVRZIERJVklERU5EIEVURiBBVQ0KDQoNCg0KDQojIyAyLiBTZWN1cml0eSBBbmFseXNpcw0KDQpQdWxsIGRhdGEgZm9yIHRpY2tlcnMgZGVzY3JpYmVkIGFib3ZlLg0KYGBge3J9DQojaW5zdGFsbCBxdWFudG1vZCwgeG1sMg0KcmVxdWlyZShxdWFudG1vZCkNCg0KYGBgDQoNCmBgYHtyfQ0KDQoNCmdsb2JhbF9ldGYgPSBjKCdCSVYnLCAjIFVTIElOVEVSTUVESUFURSBCT05EDQogICAgICAgICAgICAnVkNTSCcsIyBVUyBJTlZFU1RNRU5UIEdSQURFIEJPTkQNCiAgICAgICAgICAgICdCTkRYJywjIEdMT0JBTCBCT05EIEVURg0KICAgICAgICAgICAgJ1ZOUScsICNVUyBSRUlUDQogICAgICAgICAgICAnVlQnLCAjR0xPQkFMIFNUT0NLJw0KICAgICAgICAgICAgJ1NQWScgI1VTIFNUT0NLIChTUERSKQ0KKQ0KDQpqX2V0ZiA9IGMoJzEzNDMuVCcsICAjIEpSRUlUIChKUCAxMzQzKQ0KICAgICAgICAgICcxNTU1LlQnICMgQVUgUkVJVCAoSlAgMTU1NSkNCikNCiAgICAgICAgICAgDQphdV9ldGYgPSBjKCdIVlNULkFYJyAjRVFVSVRZIERJVklERU5EIEVURiBBVSAoSFZTVCBBVSkNCikNCiAgICAgICAgICAgIA0KZ2V0U3ltYm9scyhnbG9iYWxfZXRmLCBhdXRvLmFzc2lnbiA9IFQpDQpnZXRTeW1ib2xzKGpfZXRmLCBhdXRvLmFzc2lnbiA9IFQsIHNyYz0neWFob29qJykNCmdldFN5bWJvbHMoYXVfZXRmLCBhdXRvLmFzc2lnbiA9IFQpDQoNCmBgYA0KRmluZCBvdXQgY2hhcmFjdGVyaXN0aWNzIG9mIGVhY2ggb2YgYWxsIHRoZSB0aWNrZXJzLg0KDQojIyMgUGxvdHMNCg0KYGBge3J9DQp0aWNrZXJzID0gbGlzdChCSVYsVkNTSCxCTkRYLFZOUSxWVCxTUFksYFlKMTM0My5UYCxgWUoxNTU1LlRgLEhWU1QuQVgpDQpuYW1lID0gbGlzdCgnQklWJywnVkNTSCcsJ0JORFgnLCdWTlEnLCdWVCcsJ1NQWScsJ1lKMTM0My5UJywnWUoxNTU1LlQnLCdIVlNULkFYJykNCg0KdCA9IEJJVg0KaW5pdC5kIDwtIGluZGV4KHQpWzFdDQplIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSkNCnBsb3QoZSwgbWFpbj1uYW1lcyhlKSkNCnQgPSBWQ1NIDQppbml0LmQgPC0gaW5kZXgodClbMV0NCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KdCA9IEJORFgNCmluaXQuZCA8LSBpbmRleCh0KVsxXQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQp0ID0gVk5RDQppbml0LmQgPC0gaW5kZXgodClbMV0NCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KdCA9IFZUDQppbml0LmQgPC0gaW5kZXgodClbMV0NCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KdCA9IFNQWQ0KaW5pdC5kIDwtIGluZGV4KHQpWzFdDQplIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSkNCnBsb3QoZSwgbWFpbj1uYW1lcyhlKSkNCnQgPSBgWUoxMzQzLlRgDQppbml0LmQgPC0gaW5kZXgodClbMV0NCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KdCA9IGBZSjE1NTUuVGANCmluaXQuZCA8LSBpbmRleCh0KVsxXQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQp0ID0gYEhWU1QuQVhgDQppbml0LmQgPC0gaW5kZXgodClbMV0NCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KYGBgDQoNCg0KIyMjIFJldHVybnMNCk5leHQsIGNhbGN1bGF0ZSBSZXR1cm5zIGFuZCBWb2xhdGlsaXkgKCRcbXUgXCBhbmQgXCBcc2lnbWEkKSBmb3IgZWFjaCBvZiB0aGUgRVRGcw0KDQpgYGB7cn0NCm1lYW5zID0gYygpDQpzZHMgPSBjKCkNCnJldHVybnMgPSBjKCkNCmZvcihpIGluIHNlcSg5KSl7DQogIHRpY2tlciA9IHRpY2tlcnNbaV1bWzFdXQ0KICBwcmljZXNfbW9udGhseSA8LSB0by5tb250aGx5KHRpY2tlciwgbmFtZT1uYW1lW2ldLCBpbmRleEF0ID0gImxhc3RvZiIsIE9ITEMgPSBUKQ0KICByZXR1cm4gPC0gUk9DKEFkKHByaWNlc19tb250aGx5KSkNCiAgcmV0dXJucyA9IGNiaW5kKHJldHVybnMscmV0dXJuKQ0KICBtZWFucyA9IGMobWVhbnMsIG1lYW4ocmV0dXJuLCBuYS5ybT1UKSkNCiAgc2RzID0gYyhzZHMsIHNkKHJldHVybiwgbmEucm09VCkpDQp9DQpkZiA9IGRhdGEuZnJhbWUodW5saXN0KG5hbWUpLCBtZWFucywgc2RzKQ0KY29sbmFtZXMoZGYpID0gYygnRVRGJywnTXVfTW9udGhseScsICdTaWdtYV9Nb250aGx5JykNCmRmDQpgYGANCmBgYHtyfQ0KbGlicmFyeShmUG9ydGZvbGlvKQ0KbGlicmFyeShwdXJycikNCnJldHVybnMgPSBkYXRhLmZyYW1lKHJldHVybnMpDQoNCmNvbG5hbWVzKHJldHVybnMpIDwtIHVubGlzdChtYXAoY29sbmFtZXMocmV0dXJucyksIGZ1bmN0aW9uKHgpe3VubGlzdChzdHJzcGxpdCh4LCdbLl0nKSlbMV19KSkNCmNvdmRhdGEgPSBjb3YocmV0dXJucywgdXNlID0gImNvbXBsZXRlLm9icyIpDQoNCmNvcnJkYXRhID0gY29yKHJldHVybnMsIHVzZT0nY29tcGxldGUub2JzJykNCmhlYXRtYXAoY29ycmRhdGEpDQpgYGANCiMjIDMuIFBvcnRmb2xpbyBDb25zdHJ1Y3Rpb24NCmBgYHtyfQ0KDQpwU3BlYyA9IHBvcnRmb2xpb1NwZWMoKQ0Kc2V0VGFyZ2V0UmV0dXJuKHBTcGVjKSA8LSAwLjA0NQ0Kc2V0U29sdmVyKHBTcGVjKSA8LSAic29sdmVSc2hvcnRFeGFjdCINCkNvbnN0cmFpbnRzID0gYygibWluVz1jKDAsMCwwLDAsMCwwLDAsMCwwKSIsICJtYXhXPWMoMC4yLDAuMiwwLjIsMC4yLDAuMiwwLjIsMC4yLDAuMiwwLjIpIiApDQplZmZpY2llbnRQb3J0Zm9saW8oYXMudGltZVNlcmllcyhyZXR1cm5zW2NvbXBsZXRlLmNhc2VzKHJldHVybnMpLF0pLCBwU3BlYywgQ29uc3RyYWludHMpDQoNCg0KYGBgDQoNCiMjIDQuIFBvcnRmb2xpbyBJbXBsZW1lbnRhdGlvbg0KDQoNCiMjIDUuIFBvcnRmb2xpbyBFdmFsdWF0aW9uDQoNCg0KIyMgNi4gUG9ydGZvbGlvIFJldmlzaW9ucw0KDQoNCg==</div>
-=======
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubmV3X2V0Zj0gYyhcbiAgJ1ZUSScsXG4gICdWRUEnLFxuICAnVkdUJyxcbiAgJ1hMRicsXG4gICdYTEUnLFxuICAnWExJJyxcbiAgJ1hMWScsXG4gICdWQVcnLFxuICAnWExQJyxcbiAgJ1ZQVSdcbilcblxuZ2V0U3ltYm9scyhuZXdfZXRmLCBhdXRvLmFzc2lnbj1UKVxuXG5gYGAifQ== -->
-<pre class="r"><code>new_etf= c(
+  &#39;VT&#39;, #GLOBAL STOCK&#39;
+  &#39;SPY&#39;, #US STOCK (SPDR)
   &#39;VTI&#39;,
   &#39;VEA&#39;,
   &#39;VGT&#39;,
@@ -2061,304 +1790,191 @@ tangencyPortfolio(as.timeSeries(returns[complete.cases(returns),]))
   &#39;XLY&#39;,
   &#39;VAW&#39;,
   &#39;XLP&#39;,
-  &#39;VPU&#39;
+  &#39;VPU&#39;,
+  &#39;HEWJ&#39;,
+  &#39;DXJ&#39;,
+  &#39;DZZ&#39;,
+  &#39;GLD&#39;,
+  &#39;BDRY&#39;,
+  &#39;REM&#39;,
+  &#39;IYR&#39;,
+  &#39;EWJ&#39;,
+  &#39;IVLU&#39;,
+  &#39;DXJ&#39;,
+  &#39;BBJP&#39;,
+  &#39;VWOB&#39;
+  
 )
 
-getSymbols(new_etf, auto.assign=T)
+# Japan Denominated
+
+j_etf = c(
+  &#39;1328.T&#39;,
+  &#39;1343.T&#39;,
+  &#39;1345.T&#39;,
+  &#39;1540.T&#39;,
+  &#39;1555.T&#39;,
+  &#39;1615.T&#39;,
+  &#39;2561.T&#39;
+  
+)
+
+# AU Denominated
+
+au_etf = c(
+  &#39;HVST.AX&#39;
+)
+
+
+getSymbols(us_etf, auto.assign=T)
+getSymbols(j_etf, source=&#39;yahooj&#39;, auto.assign=T)
+getSymbols(au_etf, auto.assign=T)</code></pre>
+<pre class="{r}"><code># USD to JPY Currency
+usd_jpy = historical_exchange_rates(&#39;USD&#39;, to=&#39;JPY&#39;, start_date=&#39;2007-01-01&#39;, end_date=&#39;2021-11-09&#39;)
+usd_jpy = as.xts(usd_jpy$one_USD_equivalent_to_x_JPY, order.by=as.Date(usd_jpy$date))
+
+# AUD to JPY Currency
+aud_jpy = historical_exchange_rates(&#39;AUD&#39;, to=&#39;JPY&#39;, start_date=&#39;2007-01-01&#39;, end_date=&#39;2021-11-09&#39;)
+aud_jpy = as.xts(aud_jpy$one_AUD_equivalent_to_x_JPY, order.by=as.Date(aud_jpy$date))</code></pre>
+<pre class="{r}"><code># Convert us_tickers to JPY
+us_tickers = sapply(us_etf, FUN=function(x) eval(as.symbol(x)))
+us_tickers = sapply(us_tickers, FUN=function(x) x[,6]=x[,6]*usd_jpy) 
+
+# Get JP returns
+j_tickers = sapply(j_etf, FUN=function(x) eval(as.symbol(x)))
+j_tickers = sapply(j_tickers, FUN=function(x) x[,6]) 
+
+# Convert AU tickers to JPY
+# au_tickers = sapply(au_etf, FUN=function(x) eval(as.symbol(x)))
+# au_tickers = sapply(au_tickers, FUN=function(x) x[,6]=x[,6]*aud_jpy) 
+au_tickers=c(HVST.AX$HVST.AX.Adjusted*aud_jpy)
 </code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuVlRJJFZUSS5BZGp1c3RlZCA9IFZUSSRWVEkuQWRqdXN0ZWQgKiB1c2RfanB5XG5WRUEkVkVBLkFkanVzdGVkID0gVkVBJFZFQS5BZGp1c3RlZCAqIHVzZF9qcHlcblZHVCRWR1QuQWRqdXN0ZWQgPSBWR1QkVkdULkFkanVzdGVkICogdXNkX2pweVxuWExGJFhMRi5BZGp1c3RlZCA9IFhMRiRYTEYuQWRqdXN0ZWQgKiB1c2RfanB5XG5YTEUkWExFLkFkanVzdGVkID0gWExFJFhMRS5BZGp1c3RlZCAqIHVzZF9qcHlcblhMSSRYTEkuQWRqdXN0ZWQgPSBYTEkkWExJLkFkanVzdGVkICogdXNkX2pweVxuWExZJFhMWS5BZGp1c3RlZCA9IFhMWSRYTFkuQWRqdXN0ZWQgKiB1c2RfanB5XG5WQVckVkFXLkFkanVzdGVkID0gVkFXJFZBVy5BZGp1c3RlZCAqIHVzZF9qcHlcblhMUCRYTFAuQWRqdXN0ZWQgPSBYTFAkWExQLkFkanVzdGVkICogdXNkX2pweVxuVlBVJFZQVS5BZGp1c3RlZCA9IFZQVSRWUFUuQWRqdXN0ZWQgKiB1c2RfanB5XG5gYGAifQ== -->
-<pre class="r"><code>VTI$VTI.Adjusted = VTI$VTI.Adjusted * usd_jpy
-VEA$VEA.Adjusted = VEA$VEA.Adjusted * usd_jpy
-VGT$VGT.Adjusted = VGT$VGT.Adjusted * usd_jpy
-XLF$XLF.Adjusted = XLF$XLF.Adjusted * usd_jpy
-XLE$XLE.Adjusted = XLE$XLE.Adjusted * usd_jpy
-XLI$XLI.Adjusted = XLI$XLI.Adjusted * usd_jpy
-XLY$XLY.Adjusted = XLY$XLY.Adjusted * usd_jpy
-VAW$VAW.Adjusted = VAW$VAW.Adjusted * usd_jpy
-XLP$XLP.Adjusted = XLP$XLP.Adjusted * usd_jpy
-VPU$VPU.Adjusted = VPU$VPU.Adjusted * usd_jpy</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubmV3X3RpY2tlcnMgPSBsaXN0KFZUSSwgVkVBLCBWR1QsIFhMRiwgWExFLCBYTEksIFhMWSwgVkFXLCBYTFAsIFZQVSlcbm5ld19uYW1lID0gbmV3X2V0ZlxudCA9IFZUSVxuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>new_tickers = list(VTI, VEA, VGT, XLF, XLE, XLI, XLY, VAW, XLP, VPU)
-new_name = new_etf
-t = VTI
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudCA9IFZFQVxuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>t = VEA
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudCA9IFZHVFxuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>t = VGT
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudCA9IFhMRlxuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>t = XLF
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudCA9IFhMRVxuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>t = XLE
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudCA9IFhMSVxuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>t = XLI
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudCA9IFhMWVxuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>t = XLY
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudCA9IFZBV1xuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>t = VAW
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudCA9IFhMUFxuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>t = XLP
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudCA9IFZQVVxuaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZVxuZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWVcbnBsb3QoZSwgbWFpbj1uYW1lcyhlKSlcbmBgYCJ9 -->
-<pre class="r"><code>t = VPU
-init.d &lt;- index(t)[1] # first date
-e &lt;- t[, 6]/as.numeric(t[init.d, 6]) # adjusted values / first adjusted value
-plot(e, main=names(e))</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubmV3X21lYW5zID0gYygpXG5uZXdfc2RzID0gYygpXG5uZXdfcmV0dXJucyA9IGMoKVxuZm9yKGkgaW4gc2VxKGxlbmd0aChuZXdfZXRmKSkpe1xuICB0aWNrZXIgPSBuZXdfdGlja2Vyc1tpXVtbMV1dXG4gIHByaWNlc19tb250aGx5IDwtIHRvLm1vbnRobHkodGlja2VyLCBuYW1lPW5ld19uYW1lW2ldLCBpbmRleEF0ID0gXCJsYXN0b2ZcIiwgT0hMQyA9IFQpXG4gIHJldHVybiA8LSBST0MoQWQocHJpY2VzX21vbnRobHkpKVxuICBuZXdfcmV0dXJucyA9IGNiaW5kKG5ld19yZXR1cm5zLHJldHVybilcbiAgbmV3X21lYW5zID0gYyhuZXdfbWVhbnMsIG1lYW4ocmV0dXJuLCBuYS5ybT1UKSlcbiAgbmV3X3NkcyA9IGMobmV3X3Nkcywgc2QocmV0dXJuLCBuYS5ybT1UKSlcbn1cbm5ld19kZiA9IGRhdGEuZnJhbWUodW5saXN0KG5ld19uYW1lKSwgbmV3X21lYW5zLCBuZXdfc2RzKVxuY29sbmFtZXMobmV3X2RmKSA9IGMoJ0VURicsJ011X01vbnRobHknLCAnU2lnbWFfTW9udGhseScpXG5uZXdfZGZcbmBgYCJ9 -->
-<pre class="r"><code>new_means = c()
-new_sds = c()
-new_returns = c()
-for(i in seq(length(new_etf))){
-  ticker = new_tickers[i][[1]]
-  prices_monthly &lt;- to.monthly(ticker, name=new_name[i], indexAt = &quot;lastof&quot;, OHLC = T)
-  return &lt;- ROC(Ad(prices_monthly))
-  new_returns = cbind(new_returns,return)
-  new_means = c(new_means, mean(return, na.rm=T))
-  new_sds = c(new_sds, sd(return, na.rm=T))
+<pre class="{r}"><code># Convert into xts dataframe and merge
+
+us_tickers = do.call(merge, us_tickers)
+names(us_tickers) = us_etf
+
+j_tickers = do.call(merge, j_tickers)
+names(j_tickers) = j_etf
+
+names(au_tickers)= &#39;HVST.AX&#39;
+
+all_tickers = cbind(us_tickers, j_tickers)
+
+all_tickers = cbind(all_tickers, au_tickers)
+names(all_tickers)[29:35] = j_etf
+</code></pre>
+<pre class="{r}"><code>means = c()
+sds = c()
+returns = c()
+
+for (t in names(all_tickers)) {
+  ticker = all_tickers[,t]
+  prices_monthly &lt;- to.monthly(ticker, name=t, indexAt = &quot;lastof&quot;, OHLC = F)
+  return &lt;- ROC(prices_monthly)
+  returns = cbind(returns,return)
+  means = c(means, mean(return, na.rm=T))
+  sds = c(sds, sd(return, na.rm=T))  
+  
 }
-new_df = data.frame(unlist(new_name), new_means, new_sds)
-colnames(new_df) = c(&#39;ETF&#39;,&#39;Mu_Monthly&#39;, &#39;Sigma_Monthly&#39;)
-new_df</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShmUG9ydGZvbGlvKVxubGlicmFyeShwdXJycilcbm5ld19yZXR1cm5zID0gZGF0YS5mcmFtZShuZXdfcmV0dXJucylcblxuY29sbmFtZXMobmV3X3JldHVybnMpIDwtIHVubGlzdChtYXAoY29sbmFtZXMobmV3X3JldHVybnMpLCBmdW5jdGlvbih4KXt1bmxpc3Qoc3Ryc3BsaXQoeCwnWy5dJykpWzFdfSkpXG5jb3ZkYXRhID0gY292KG5ld19yZXR1cm5zLCB1c2UgPSBcImNvbXBsZXRlLm9ic1wiKVxuXG5jb3JyZGF0YSA9IGNvcihuZXdfcmV0dXJucywgdXNlPSdjb21wbGV0ZS5vYnMnKVxuaGVhdG1hcChjb3JyZGF0YSlcbmBgYCJ9 -->
-<pre class="r"><code>library(fPortfolio)
+</code></pre>
+<pre class="{r}"><code>df = data.frame(names(all_tickers), means, sds)
+colnames(df) = c(&#39;ETF&#39;,&#39;Mu_Monthly&#39;, &#39;Sigma_Monthly&#39;)
+df</code></pre>
+<pre class="{r}"><code>library(fPortfolio)
 library(purrr)
-new_returns = data.frame(new_returns)
+returns = data.frame(returns)
 
-colnames(new_returns) &lt;- unlist(map(colnames(new_returns), function(x){unlist(strsplit(x,&#39;[.]&#39;))[1]}))
-covdata = cov(new_returns, use = &quot;complete.obs&quot;)
+colnames(returns) &lt;- unlist(map(colnames(returns), function(x){unlist(strsplit(x,&#39;[.]&#39;))[1]}))
+covdata = cov(returns, use = &quot;complete.obs&quot;)
 
-corrdata = cor(new_returns, use=&#39;complete.obs&#39;)
+corrdata = cor(returns, use=&#39;complete.obs&#39;)
 heatmap(corrdata)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5hbGxfcmV0dXJucyA9IGNiaW5kKHJldHVybnMsIG5ld19yZXR1cm5zKVxuYWxsX3JldHVybnNcbmBgYCJ9 -->
-<pre class="r"><code>
-all_returns = cbind(returns, new_returns)
-all_returns</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5kYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKGFsbF9yZXR1cm5zW2NvbXBsZXRlLmNhc2VzKGFsbF9yZXR1cm5zKSxdKSlcbnBvcnQgPSB0YW5nZW5jeVBvcnRmb2xpbyhkYXRhPWRhdGEpXG5cbnBvcnRcbmBgYCJ9 -->
-<pre class="r"><code>
-data = portfolioData(as.timeSeries(all_returns[complete.cases(all_returns),]))
-port = tangencyPortfolio(data=data)
-
-port</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBMb3c6IDAuMDE0NCwgTWVkOiAwLjAyODksIEhpZ2g6IDAuMDcyMlxuIyBMb3cgUmlzayBQb3J0Zm9saW9cbnBTcGVjID0gcG9ydGZvbGlvU3BlYygpXG5hbm51YWxfdGFyZ2V0ID0gMC4wM1xudGFyZ2V0X3JldHVybiA9ICgxK2FubnVhbF90YXJnZXQpKiooMS8xMikgLSAxXG5cbnNldFRhcmdldFJldHVybihwU3BlYykgPSB0YXJnZXRfcmV0dXJuXG5kYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKGFsbF9yZXR1cm5zW2NvbXBsZXRlLmNhc2VzKGFsbF9yZXR1cm5zKSxdKSlcbnBvcnQgPSBlZmZpY2llbnRQb3J0Zm9saW8oZGF0YT1kYXRhLCBzcGVjPXBTcGVjKVxuXG5wb3J0XG5gYGAifQ== -->
-<pre class="r"><code># Low: 0.0144, Med: 0.0289, High: 0.0722
-# Low Risk Portfolio
-pSpec = portfolioSpec()
-annual_target = 0.03
-target_return = (1+annual_target)**(1/12) - 1
-
-setTargetReturn(pSpec) = target_return
-data = portfolioData(as.timeSeries(all_returns[complete.cases(all_returns),]))
-port = efficientPortfolio(data=data, spec=pSpec)
-
-port</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBMb3c6IDAuMDE0NCwgTWVkOiAwLjAyODksIEhpZ2g6IDAuMDcyMlxuIyBNZWRpdW0gUmlzayBQb3J0Zm9saW9cbnBTcGVjID0gcG9ydGZvbGlvU3BlYygpXG5hbm51YWxfdGFyZ2V0ID0gMC4xNFxudGFyZ2V0X3JldHVybiA9ICgxK2FubnVhbF90YXJnZXQpKiooMS8xMikgLSAxXG4jIFxuc2V0VGFyZ2V0UmV0dXJuKHBTcGVjKSA9IHRhcmdldF9yZXR1cm5cbiMgZGF0YSA9IHBvcnRmb2xpb0RhdGEoYXMudGltZVNlcmllcyhyZXR1cm5zW2NvbXBsZXRlLmNhc2VzKHJldHVybnMpLF0pKVxuZGF0YSA9IHBvcnRmb2xpb0RhdGEoYXMudGltZVNlcmllcyhhbGxfcmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhhbGxfcmV0dXJucyksXSkpXG5wb3J0ID0gZWZmaWNpZW50UG9ydGZvbGlvKGRhdGE9ZGF0YSwgc3BlYz1wU3BlYywgY29uc3RyYWludHM9YygnbWF4V1sxOjE5XT0wLjInKSlcblxucG9ydFxuYGBgIn0= -->
-<pre class="r"><code># Low: 0.0144, Med: 0.0289, High: 0.0722
-# Medium Risk Portfolio
-pSpec = portfolioSpec()
-annual_target = 0.14
-target_return = (1+annual_target)**(1/12) - 1
-# 
-setTargetReturn(pSpec) = target_return
-# data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
-data = portfolioData(as.timeSeries(all_returns[complete.cases(all_returns),]))
-port = efficientPortfolio(data=data, spec=pSpec, constraints=c(&#39;maxW[1:19]=0.2&#39;))
-
-port</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBMb3c6IDAuMDE0NCwgTWVkOiAwLjAyODksIEhpZ2g6IDAuMDcyMlxuIyBIaWdoIFJpc2sgUG9ydGZvbGlvXG5wU3BlYyA9IHBvcnRmb2xpb1NwZWMoKVxuYW5udWFsX3RhcmdldCA9IDAuMTZcbnRhcmdldF9yZXR1cm4gPSAoMSthbm51YWxfdGFyZ2V0KSoqKDEvMTIpIC0gMVxuIyBcbnNldFRhcmdldFJldHVybihwU3BlYykgPSB0YXJnZXRfcmV0dXJuXG4jIGRhdGEgPSBwb3J0Zm9saW9EYXRhKGFzLnRpbWVTZXJpZXMocmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhyZXR1cm5zKSxdKSlcbmRhdGEgPSBwb3J0Zm9saW9EYXRhKGFzLnRpbWVTZXJpZXMoYWxsX3JldHVybnNbY29tcGxldGUuY2FzZXMoYWxsX3JldHVybnMpLF0pKVxucG9ydCA9IGVmZmljaWVudFBvcnRmb2xpbyhkYXRhPWRhdGEsIHNwZWM9cFNwZWMsIGNvbnN0cmFpbnRzPWMoJ21heFdbMToxOV09MC4yJykpXG5cbnBvcnRcbmBgYCJ9 -->
-<pre class="r"><code># Low: 0.0144, Med: 0.0289, High: 0.0722
-# High Risk Portfolio
-pSpec = portfolioSpec()
-annual_target = 0.16
-target_return = (1+annual_target)**(1/12) - 1
-# 
-setTargetReturn(pSpec) = target_return
-# data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
-data = portfolioData(as.timeSeries(all_returns[complete.cases(all_returns),]))
-port = efficientPortfolio(data=data, spec=pSpec, constraints=c(&#39;maxW[1:19]=0.2&#39;))
-
-port</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
 </div>
-</div>
-<div id="efficient-frontier-plot" class="section level1">
-<h1>Efficient Frontier Plot</h1>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5zZXRORnJvbnRpZXJQb2ludHMocFNwZWMpIDwtIDIwXG5cbmxvbmdGcm9udGllciA8LSBwb3J0Zm9saW9Gcm9udGllcihkYXRhID0gZGF0YSwgc3BlYyA9IHBTcGVjKVxuXG5jb2wgPSBxdWFsaVBhbGV0dGUoMzAsIFwiU2V0MVwiKVxudGFpbG9yZWRGcm9udGllclBsb3QobG9uZ0Zyb250aWVyLCByZXR1cm4gPSBcIm1lYW5cIiwgcmlzayA9IFwiQ292XCIpXG5ncmlkKClcbnNpbmdsZUFzc2V0UG9pbnRzKGxvbmdGcm9udGllciwgY29sPSdyZWQnKVxuXG5gYGAifQ== -->
-<pre class="r"><code>
+<div id="portfolio-construction" class="section level1">
+<h1>Portfolio Construction</h1>
+<pre class="{r}"><code># Create in-sample and out-sample splits, portfolio weights are based on in-sample
+train = as.timeSeries(head(returns[complete.cases(returns),], 149))
+test = as.timeSeries(tail(returns[complete.cases(returns),], 30))
+data = portfolioData(train)
+pSpec = portfolioSpec()
+</code></pre>
+<pre class="{r}"><code>n = ncol(returns)
 setNFrontierPoints(pSpec) &lt;- 20
-
 longFrontier &lt;- portfolioFrontier(data = data, spec = pSpec)
-
-col = qualiPalette(30, &quot;Set1&quot;)
+col = qualiPalette(n, &quot;Set1&quot;)
 tailoredFrontierPlot(longFrontier, return = &quot;mean&quot;, risk = &quot;Cov&quot;)
 grid()
 singleAssetPoints(longFrontier, col=&#39;red&#39;)
 </code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-</div>
-<div id="experimentation-with-target-risk-and-short-selling-for-screenshots" class="section level1">
-<h1>Experimentation with Target Risk and Short Selling (for screenshots)</h1>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucFNwZWMgPSBwb3J0Zm9saW9TcGVjKClcbmFubnVhbF9yaXNrID0gMC4wNVxudGFyZ2V0X3Jpc2sgPSBhbm51YWxfcmlzay9zcXJ0KDEyKVxuc2V0VGFyZ2V0UmlzayhwU3BlYykgPSB0YXJnZXRfcmlza1xuZGF0YSA9IHBvcnRmb2xpb0RhdGEoYXMudGltZVNlcmllcyhyZXR1cm5zW2NvbXBsZXRlLmNhc2VzKHJldHVybnMpLF0pKVxucG9ydCA9IG1heHJldHVyblBvcnRmb2xpbyhkYXRhLCBzcGVjPXBTcGVjKVxuXG5wb3J0XG5gYGAifQ== -->
-<pre class="r"><code>pSpec = portfolioSpec()
-annual_risk = 0.05
-target_risk = annual_risk/sqrt(12)
-setTargetRisk(pSpec) = target_risk
-data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
-port = maxreturnPortfolio(data, spec=pSpec)
+<pre class="{r}"><code>```{r fig.height=10, fig.width=15}
 
-port</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucFNwZWMgPSBwb3J0Zm9saW9TcGVjKClcbmFubnVhbF9yaXNrID0gMC4xXG50YXJnZXRfcmlzayA9IGFubnVhbF9yaXNrL3NxcnQoMTIpXG5zZXRUYXJnZXRSaXNrKHBTcGVjKSA9IHRhcmdldF9yaXNrXG5kYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKHJldHVybnNbY29tcGxldGUuY2FzZXMocmV0dXJucyksXSkpXG5wb3J0ID0gbWF4cmV0dXJuUG9ydGZvbGlvKGRhdGEsIHNwZWM9cFNwZWMpXG5cbnBvcnRcbmBgYCJ9 -->
-<pre class="r"><code>pSpec = portfolioSpec()
-annual_risk = 0.1
-target_risk = annual_risk/sqrt(12)
-setTargetRisk(pSpec) = target_risk
-data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
-port = maxreturnPortfolio(data, spec=pSpec)
+########################################
+#      Efficient Frontier              #
+########################################
 
-port</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucFNwZWMgPSBwb3J0Zm9saW9TcGVjKClcbmFubnVhbF9yaXNrID0gMC4xXG50YXJnZXRfcmlzayA9IGFubnVhbF9yaXNrL3NxcnQoMTIpICMwLjAyODlcbnNldFNvbHZlcihwU3BlYykgPSAnc29sdmVSc2hvcnRFeGFjdCdcbnNldFRhcmdldFJpc2socFNwZWMpID0gdGFyZ2V0X3Jpc2tcbmRhdGEgPSBwb3J0Zm9saW9EYXRhKGFzLnRpbWVTZXJpZXMocmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhyZXR1cm5zKSxdKSlcbnBvcnQgPSBtYXhyZXR1cm5Qb3J0Zm9saW8oZGF0YSwgc3BlYz1wU3BlYylcbnByaW50KHRhcmdldF9yaXNrKVxucG9ydFxuYGBgIn0= -->
-<pre class="r"><code>pSpec = portfolioSpec()
-annual_risk = 0.1
-target_risk = annual_risk/sqrt(12) #0.0289
-setSolver(pSpec) = &#39;solveRshortExact&#39;
-setTargetRisk(pSpec) = target_risk
-data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
-port = maxreturnPortfolio(data, spec=pSpec)
-print(target_risk)
-port</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucFNwZWMgPSBwb3J0Zm9saW9TcGVjKClcbmFubnVhbF90YXJnZXQgPSAwLjFcbnRhcmdldF9yZXR1cm4gPSAoMSthbm51YWxfdGFyZ2V0KSoqKDEvMTIpIC0gMSAjMC4wMDc5N1xuc2V0VGFyZ2V0UmV0dXJuKHBTcGVjKSA9IHRhcmdldF9yZXR1cm5cbmRhdGEgPSBwb3J0Zm9saW9EYXRhKGFzLnRpbWVTZXJpZXMocmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhyZXR1cm5zKSxdKSlcbnBvcnQgPSBlZmZpY2llbnRQb3J0Zm9saW8oZGF0YSwgc3BlYz1wU3BlYylcbnByaW50KHRhcmdldF9yZXR1cm4pXG5wb3J0XG5gYGAifQ== -->
-<pre class="r"><code>pSpec = portfolioSpec()
-annual_target = 0.1
-target_return = (1+annual_target)**(1/12) - 1 #0.00797
+
+
+
+########################################
+#      LOW RISK PORTFOLIO              #
+########################################
+
+annual_target = 0.07
+target_return = (1+annual_target)**(1/12) - 1
+
+# optimise weights
 setTargetReturn(pSpec) = target_return
-data = portfolioData(as.timeSeries(returns[complete.cases(returns),]))
-port = efficientPortfolio(data, spec=pSpec)
-print(target_return)
-port</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuXG5taSA9IGMoKVxuZm9yICh0IGluIHRpY2tlcnMpIHtcbiAgcHJpbnQobWluKGluZGV4KHQpKSlcbiAgbWkgPSBjKG1pLCBtaW4oaW5kZXgodCkpKVxuXG59XG5mb3IgKHQgaW4gbmV3X3RpY2tlcnMpIHtcbiAgcHJpbnQobWluKGluZGV4KHQpKSlcbiAgbWkgPSBjKG1pLCBtaW4oaW5kZXgodCkpKVxufVxuYGBgIn0= -->
-<pre class="r"><code>
-mi = c()
-for (t in tickers) {
-  print(min(index(t)))
-  mi = c(mi, min(index(t)))
+port = efficientPortfolio(data=data, spec=pSpec)
 
+port
+
+# performance on test set
+opt_weights &lt;- port@portfolio@portfolio$weights
+opt_weights &lt;- as.data.frame(opt_weights)
+returns_timeseries &lt;- test
+opt_portfolio &lt;- returns_timeseries*opt_weights$opt_weights[match(names(returns_timeseries), rownames(opt_weights))][col(returns_timeseries)]
+cumulative_returns = as.xts(cumprod(rowSums(opt_portfolio)+1))
+
+
+# plot equal weight portfolio
+n = length(opt_weights$opt_weights)
+equal_weights &lt;- rep(1/n, n)
+weights = cbind(equal_weights, opt_weights)
+opt_portfolio &lt;- returns_timeseries*weights$equal_weights[match(names(returns_timeseries), rownames(weights))][col(returns_timeseries)]
+cumulative_returns_equal = as.xts(cumprod(rowSums(opt_portfolio)+1))
+
+
+plot(cumulative_returns_equal, type=&#39;l&#39;, ylim=c(.5,1.8))
+lines(cumulative_returns,  col=&#39;red&#39;)
+
+# ROLLING BACKTEST with rebalancing
+lowRiskStrategy &lt;- function(data, spec, constraints, backtest){
+  Parameters &lt;- getStrategyParams(backtest)
+  strategyPortfolio &lt;- efficientPortfolio(data, spec, constraints)
+  return (strategyPortfolio)
 }
-for (t in new_tickers) {
-  print(min(index(t)))
-  mi = c(mi, min(index(t)))
-}</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-chunk-end -->
+
+# get full period returns for equal weighted
+full_period_return = as.timeSeries(all_returns[complete.cases(all_returns),])
+equal_weight_full_period = full_period_return *weights$equal_weights[match(names(full_period_return), rownames(weights))][col(full_period_return)]
+backtest_data = cbind(as.timeSeries(rowSums(equal_weight_full_period)), full_period_return)
+
+backtest_data = backtest_data[complete.cases(backtest_data), ]
+
+defaultBacktest &lt;- portfolioBacktest()
+setWindowsHorizon(defaultBacktest) &lt;- &quot;36m&quot;
+setSmootherInitialWeights(defaultBacktest) &lt;- rep(1/20, 20)
+setStrategyFun(defaultBacktest) &lt;- lowRiskStrategy
+
+pfs = portfolioBacktesting(formula = TS.1~N225+YJ1343+BIV+VCSH+BNDX+VNQ+VT+SPY+YJ1555+HVST+VTI+VEA+VGT+XLF+XLE+XLI+XLY+VAW+XLP+VPU, spec=pSpec, data = backtest_data, backtest = defaultBacktest, trace=FALSE)
+pfs_smooth = portfolioSmoothing(pfs)
+netPerformance(pfs_smooth)
+backtestPlot(pfs_smooth, cex = 0.6, font = 1, family = &quot;mono&quot;)</code></pre>
+<p>```</p>
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIkJUMjIwMSBGaW5hbmNlIFByb2plY3QgTm90ZWJvb2siDQpvdXRwdXQ6DQogIGh0bWxfbm90ZWJvb2s6IGRlZmF1bHQNCiAgaHRtbF9kb2N1bWVudDoNCiAgICBkZl9wcmludDogcGFnZWQNCiAgcGRmX2RvY3VtZW50OiBkZWZhdWx0DQotLS0NCg0KYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9IA0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KHdhcm5pbmcgPSBGQUxTRSwgbWVzc2FnZSA9IEZBTFNFKSANCmBgYA0KDQpUaGlzIG5vdGVib29rIHF1YW50aWZpZXMgdGhlIGFuYWx5c2lzIHdlIGNvbmR1Y3RlZCB0byBhcnJpdmUgYXQgb3VyIG9wdGltYWwgYXNzZXQgYWxsb2NhdGlvbnMuDQoNCg0KIyMgMS4gRGV0ZXJtaW5lIEludmVzdG1lbnQgUG9saWN5DQoNCldoaWNoIHByb2R1Y3RzIHNob3VsZCBiZSBvZmZlcmVkIHRvIGEgdHlwaWNhbCBKYXBhbmVzZSByZXRhaWwgaW52ZXN0b3INCg0KDQojIyMgUmlzayBBcHBldGl0ZQ0KDQpUaGUgdHlwaWNhbCBKYXBhbmVzZSByZXRhaWwgaW52ZXN0b3IgaXMgcmlzayBhdmVyc2UuIE1hbnkgb2xkZXIgSmFwYW5lc2UgaW52ZXN0b3JzIGxpdmVkIHRocm91Z2ggdGhlIEFzaWFuIEZpbmFuY2lhbCBDcmlzaXMgd2hpY2ggc2F3IGEgaHVnZSBhc3NldCBidWJibGUgYW5kIHN1YnNlcXVlbnQgY3Jhc2ggaW4gSmFwYW5lc2UgZmluYW5jaWFsIG1hcmtldHMuIFRob3NlIHdobyBpbnZlc3RlZCBtb25leSByaWdodCBhdCB0aGUgcGVhayBvZiB0aGUgYXNzZXQgYnViYmxlIHdvdWxkIGhhdmUgbG9zdCBhIGNvbnNpZGVyYWJsZSBhbW91bnQgb2YgbW9uZXkuIEphcGFuIGFsc28gZW50ZXJlZCBtYW55IHllYXJzIG9mIGRlZmxhdGlvbiBhZnRlcndhcmRzLg0KDQpUaGVyZWZvcmUsIGEgdHlwaWNhbCBKYXBhbmVzZSByZXRhaWwgaW52ZXN0b3IgaXMgZGlzdGluY3QgZnJvbSBhbiBBbWVyaWNhbiBvciBFdXJvcGVhbiByZXRhaWwgaW52ZXN0b3IgaW4gdGhhdCB0aGV5IGhhdmUgZXhwZXJpZW5jZWQgbW9yZSBtYXJrZXQgZG93bnNpZGUgYW5kIGxlc3MgZWNvbm9taWMgZXVwaG9yaWEuIFdlIGV4cGVjdCB0aGF0IHRoZXkgd2lsbCBoYXZlIGEgbW9yZSBjb25zZXJ2YXRpdmUgcmlzayBhcHBldGl0ZSBhbmQgbGVzcyB0b2xlcmFuY2UgZm9yIHBvcnRmb2xpbyBkcmF3ZG93bi4NCg0KDQojIyMgT2JqZWN0aXZlIEZ1bmN0aW9uDQoNCkdpdmVuIHRoZSBjb25kaXRpb25zIGRlc2NyaWJlZCBhYm92ZSwgd2UgY2hvb3NlIHRvIGFkb3B0IHRoZSAqRWZmaWNpZW50IFJpc2sqIG9yICpNYXJrb3dpdHogUG9ydGZvbGlvKg0KDQoqKkZpeCBSZXR1cm4gYW5kIE1pbmltaXNlIFJpc2sqKg0KDQpGb3IgYSBzdGFydCwgbWF4aW1pc2UgU2hhcnBlOg0KDQokbWluIFwgXHNpZ21hKFIpIFxcIHMudC4gRShSKSA9IFJfe3RhcmdldH0kDQoNCg0KIyMjIEFtb3VudA0KQXMgc3RhdGVkIGluIHRoZSBwcmVhbWJsZSwgaW52ZXN0YWJsZSBhbW91bnQgaXMgKipKUFkgMTAwLDAwMCoqLg0KDQoNCg0KIyMgMi4gU2VjdXJpdHkgQW5hbHlzaXMNCg0KUHVsbCBkYXRhIGZvciB0aWNrZXJzIGRlc2NyaWJlZCBhYm92ZS4NCmBgYHtyfQ0KI2luc3RhbGwgcXVhbnRtb2QsIHhtbDINCnJlcXVpcmUocXVhbnRtb2QpDQoNCmBgYA0KDQpgYGB7cn0NCiNuZXcgdW5pdmVyc2UgDQojIEVURiBEYXRhDQpnbG9iYWxfZXRmID0gYygnQklWJywgIyBVUyBJTlRFUk1FRElBVEUgQk9ORA0KICAgICAgICAgICAgJ1ZDU0gnLCMgVVMgSU5WRVNUTUVOVCBHUkFERSBCT05EDQogICAgICAgICAgICAnQk5EWCcsIyBHTE9CQUwgQk9ORCBFVEYNCiAgICAgICAgICAgICdWTlEnLCAjVVMgUkVJVA0KICAgICAgICAgICAgJ1ZUJywgI0dMT0JBTCBTVE9DSycNCiAgICAgICAgICAgICdTUFknICNVUyBTVE9DSyAoU1BEUikNCikNCg0Kal9ldGYgPSBjKCcxMzI4LlQnLCcxMzQzLlQnKQ0KDQpuZXdfZXRmX3VuaXZlcnNlPSBjKA0KICAnVlRJJywNCiAgJ1ZFQScsDQogICdWR1QnLA0KICAnWExGJywNCiAgJ1hMRScsDQogICdYTFknLA0KICAnVkFXJywNCiAgJ0dMRCcsDQogICdSRU0nLA0KICAnSVZMVScsDQogICdWV09CJywNCiAgJ1BEQkMnLA0KICAnR1NHJywNCiAgJ0JJVicsICMgVVMgSU5URVJNRURJQVRFIEJPTkQNCiAgJ1ZDU0gnLCMgVVMgSU5WRVNUTUVOVCBHUkFERSBCT04NCiAgJ0JORFgnLCMgR0xPQkFMIEJPTkQgRVRGDQogICdWTlEnLCAjVVMgUkVJVA0KICAnU1BZJywgI1VTIFNUT0NLIChTUERSKQ0KICAnMTYxNS5UJywNCiAgJ0RYSicNCikNCg0KICAgICAgICAgICAgDQpnZXRTeW1ib2xzKG5ld19ldGZfdW5pdmVyc2UsIGF1dG8uYXNzaWduID0gVCkNCmdldFN5bWJvbHMoal9ldGYsIGF1dG8uYXNzaWduID0gVCwgc3JjPSd5YWhvb2onKQ0KDQpgYGANCg0KDQpgYGB7cn0NCiMgRXhjaGFuZ2UgUmF0ZSBEYXRhDQpsaWJyYXJ5KHByaWNlUikNCnVzZF9qcHkgPSBoaXN0b3JpY2FsX2V4Y2hhbmdlX3JhdGVzKCdVU0QnLCB0bz0nSlBZJywgc3RhcnRfZGF0ZT0nMjAwNy0wMS0wMScsIGVuZF9kYXRlPScyMDIxLTExLTAzJykNCnVzZF9qcHkgPSBhcy54dHModXNkX2pweSRvbmVfVVNEX2VxdWl2YWxlbnRfdG9feF9KUFksIG9yZGVyLmJ5PWFzLkRhdGUodXNkX2pweSRkYXRlKSkNCg0KIyBDb252ZXJ0IFVTQSBjdXJyZW5jeSBhZGp1c3RlZCBwcmljZXMgdG8gSlBZDQoNCkJJViRCSVYuQWRqdXN0ZWQgPSBCSVYkQklWLkFkanVzdGVkICogdXNkX2pweQ0KVkNTSCRWQ1NILkFkanVzdGVkID0gVkNTSCRWQ1NILkFkanVzdGVkICogdXNkX2pweQ0KQk5EWCRCTkRYLkFkanVzdGVkID0gQk5EWCRCTkRYLkFkanVzdGVkICogdXNkX2pweQ0KVk5RJEJOUS5BZGp1c3RlZCA9IFZOUSRWTlEuQWRqdXN0ZWQgKiB1c2RfanB5IA0KVlQkVlQuQWRqdXN0ZWQgPSBWVCRWVC5BZGp1c3RlZCAqIHVzZF9qcHkNClNQWSRTUFkuQWRqdXN0ZWQgPSBTUFkkU1BZLkFkanVzdGVkICogdXNkX2pweQ0KDQphdWRfanB5ID0gaGlzdG9yaWNhbF9leGNoYW5nZV9yYXRlcygnQVVEJywgdG89J0pQWScsIHN0YXJ0X2RhdGU9JzIwMDctMDEtMDEnLCBlbmRfZGF0ZT0nMjAyMS0xMS0wMycpDQphdWRfanB5ID0gYXMueHRzKGF1ZF9qcHkkb25lX0FVRF9lcXVpdmFsZW50X3RvX3hfSlBZLCBvcmRlci5ieT1hcy5EYXRlKGF1ZF9qcHkkZGF0ZSkpDQoNCkhWU1QuQVgkSFZTVC5BWC5BZGp1c3RlZCA9IEhWU1QuQVgkSFZTVC5BWC5BZGp1c3RlZCAqIGF1ZF9qcHkNCg0KYGBgDQoNCg0KDQpGaW5kIG91dCBjaGFyYWN0ZXJpc3RpY3Mgb2YgZWFjaCBvZiBhbGwgdGhlIHRpY2tlcnMuDQoNCiMjIyBQbG90cw0KDQpgYGB7cn0NCnRpY2tlcnMgPSBsaXN0KEJJVixWQ1NILEJORFgsVk5RLFZULFNQWSxgWUoxMzQzLlRgLGBZSjE1NTUuVGAsSFZTVC5BWCkNCm5hbWUgPSBsaXN0KCdCSVYnLCdWQ1NIJywnQk5EWCcsJ1ZOUScsJ1ZUJywnU1BZJywnWUoxMzQzLlQnLCdZSjE1NTUuVCcsJ0hWU1QuQVgnKQ0KDQp0ID0gQklWDQppbml0LmQgPC0gaW5kZXgodClbMV0NCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KdCA9IFZDU0gNCmluaXQuZCA8LSBpbmRleCh0KVsxXQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQp0ID0gQk5EWA0KaW5pdC5kIDwtIGluZGV4KHQpWzFdDQplIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSkNCnBsb3QoZSwgbWFpbj1uYW1lcyhlKSkNCnQgPSBWTlENCmluaXQuZCA8LSBpbmRleCh0KVsxXQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQp0ID0gVlQNCmluaXQuZCA8LSBpbmRleCh0KVsxXQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQp0ID0gU1BZDQppbml0LmQgPC0gaW5kZXgodClbMV0NCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KdCA9IGBZSjEzNDMuVGANCmluaXQuZCA8LSBpbmRleCh0KVsxXQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQp0ID0gYFlKMTU1NS5UYA0KaW5pdC5kIDwtIGluZGV4KHQpWzFdDQplIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSkNCnBsb3QoZSwgbWFpbj1uYW1lcyhlKSkNCnQgPSBgSFZTVC5BWGANCmluaXQuZCA8LSBpbmRleCh0KVsxXQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQpgYGANCg0KDQojIyMgUmV0dXJucw0KTmV4dCwgY2FsY3VsYXRlIFJldHVybnMgYW5kIFZvbGF0aWxpeSAoJFxtdSBcIGFuZCBcIFxzaWdtYSQpIGZvciBlYWNoIG9mIHRoZSBFVEZzDQoNCmBgYHtyfQ0KbWVhbnMgPSBjKCkNCnNkcyA9IGMoKQ0KcmV0dXJucyA9IGMoKQ0KZm9yKGkgaW4gc2VxKDkpKXsNCiAgdGlja2VyID0gdGlja2Vyc1tpXVtbMV1dDQogIHByaWNlc19tb250aGx5IDwtIHRvLm1vbnRobHkodGlja2VyLCBuYW1lPW5hbWVbaV0sIGluZGV4QXQgPSAibGFzdG9mIiwgT0hMQyA9IFQpDQogIHJldHVybiA8LSBST0MoQWQocHJpY2VzX21vbnRobHkpKQ0KICByZXR1cm5zID0gY2JpbmQocmV0dXJucyxyZXR1cm4pDQogIG1lYW5zID0gYyhtZWFucywgbWVhbihyZXR1cm4sIG5hLnJtPVQpKQ0KICBzZHMgPSBjKHNkcywgc2QocmV0dXJuLCBuYS5ybT1UKSkNCn0NCmRmID0gZGF0YS5mcmFtZSh1bmxpc3QobmFtZSksIG1lYW5zLCBzZHMpDQpjb2xuYW1lcyhkZikgPSBjKCdFVEYnLCdNdV9Nb250aGx5JywgJ1NpZ21hX01vbnRobHknKQ0KZGYNCmBgYA0KYGBge3J9DQpsaWJyYXJ5KGZQb3J0Zm9saW8pDQpsaWJyYXJ5KHB1cnJyKQ0KcmV0dXJucyA9IGRhdGEuZnJhbWUocmV0dXJucykNCg0KY29sbmFtZXMocmV0dXJucykgPC0gdW5saXN0KG1hcChjb2xuYW1lcyhyZXR1cm5zKSwgZnVuY3Rpb24oeCl7dW5saXN0KHN0cnNwbGl0KHgsJ1suXScpKVsxXX0pKQ0KY292ZGF0YSA9IGNvdihyZXR1cm5zLCB1c2UgPSAiY29tcGxldGUub2JzIikNCg0KY29ycmRhdGEgPSBjb3IocmV0dXJucywgdXNlPSdjb21wbGV0ZS5vYnMnKQ0KaGVhdG1hcChjb3JyZGF0YSkNCmBgYA0KIyMgMy4gUG9ydGZvbGlvIENvbnN0cnVjdGlvbg0KYGBge3J9DQpwU3BlYyA9IHBvcnRmb2xpb1NwZWMoKQ0KdGFuZ2VuY3lQb3J0Zm9saW8oYXMudGltZVNlcmllcyhyZXR1cm5zW2NvbXBsZXRlLmNhc2VzKHJldHVybnMpLF0pKQ0KDQpgYGANCmBgYHtyfQ0KIyBMb3c6IDAuMDE0NCwgTWVkOiAwLjAyODksIEhpZ2g6IDAuMDcyMg0KDQojIExvdyBSaXNrIFBvcnRmb2xpbw0KcFNwZWMgPSBwb3J0Zm9saW9TcGVjKCkNCiMgc2V0U29sdmVyKHBTcGVjKSA8LSAic29sdmVSZ2xway5NQUQiDQphbm51YWxfdGFyZ2V0ID0gMC4wNjUNCnRhcmdldF9yZXR1cm4gPSAoMSthbm51YWxfdGFyZ2V0KSoqKDEvMTIpIC0gMQ0KIyBhbm51YWxfcmlzayA9IDAuMDUNCiMgdGFyZ2V0X3Jpc2sgPSBhbm51YWxfcmlzay9zcXJ0KDEyKQ0KIyBzZXRUYXJnZXRSaXNrKHBTcGVjKSA9IHRhcmdldF9yaXNrDQojIHNldE9wdGltaXplKHBTcGVjKSA9ICdtYXhSZXR1cm4nDQpzZXRUYXJnZXRSZXR1cm4ocFNwZWMpID0gdGFyZ2V0X3JldHVybg0KZGF0YSA9IHBvcnRmb2xpb0RhdGEoYXMudGltZVNlcmllcyhyZXR1cm5zW2NvbXBsZXRlLmNhc2VzKHJldHVybnMpLF0pKQ0KDQpwb3J0ID0gZWZmaWNpZW50UG9ydGZvbGlvKGRhdGE9YXMudGltZVNlcmllcyhyZXR1cm5zW2NvbXBsZXRlLmNhc2VzKHJldHVybnMpLF0pLCBzcGVjPXBTcGVjKQ0KDQpwb3J0DQpgYGANCmBgYHtyfQ0KIyBMb3c6IDAuMDE0NCwgTWVkOiAwLjAyODksIEhpZ2g6IDAuMDcyMg0KDQojIE1lZGl1bSBSaXNrIFBvcnRmb2xpbw0KcFNwZWMgPSBwb3J0Zm9saW9TcGVjKCkNCmFubnVhbF90YXJnZXQgPSAwLjExDQp0YXJnZXRfcmV0dXJuID0gKDErYW5udWFsX3RhcmdldCkqKigxLzEyKSAtIDENCg0Kc2V0VGFyZ2V0UmV0dXJuKHBTcGVjKSA9IHRhcmdldF9yZXR1cm4NCmRhdGEgPSBwb3J0Zm9saW9EYXRhKGFzLnRpbWVTZXJpZXMocmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhyZXR1cm5zKSxdKSkNCg0KcG9ydCA9IGVmZmljaWVudFBvcnRmb2xpbyhkYXRhPWFzLnRpbWVTZXJpZXMocmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhyZXR1cm5zKSxdKSwgc3BlYz1wU3BlYykNCg0KcG9ydA0KYGBgDQpgYGB7cn0NCiMgTG93OiAwLjAxNDQsIE1lZDogMC4wMjg5LCBIaWdoOiAwLjA3MjINCg0KIyBIaWdoIFJpc2sgUG9ydGZvbGlvDQpwU3BlYyA9IHBvcnRmb2xpb1NwZWMoKQ0KYW5udWFsX3RhcmdldCA9IDAuMg0KdGFyZ2V0X3JldHVybiA9ICgxK2FubnVhbF90YXJnZXQpKiooMS8xMikgLSAxDQoNCnNldFRhcmdldFJldHVybihwU3BlYykgPSB0YXJnZXRfcmV0dXJuDQpkYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKHJldHVybnNbY29tcGxldGUuY2FzZXMocmV0dXJucyksXSkpDQoNCnBvcnQgPSBlZmZpY2llbnRQb3J0Zm9saW8oZGF0YT1hcy50aW1lU2VyaWVzKHJldHVybnNbY29tcGxldGUuY2FzZXMocmV0dXJucyksXSksIHNwZWM9cFNwZWMpDQoNCnBvcnQNCmBgYA0KIyMgNC4gUG9ydGZvbGlvIEltcGxlbWVudGF0aW9uDQoNCg0KIyMgNS4gUG9ydGZvbGlvIEV2YWx1YXRpb24NCg0KDQojIyA2LiBQb3J0Zm9saW8gUmV2aXNpb25zDQoNCiMjIyBXZSBjb25zaWRlciBhIG5ldyBjYW5kaWRhdGUgc2V0IG9mIEVURnM6DQotIFZUSSBWYW5ndWFyZCBUb3RhbCBTdG9jayBNYXJrZXQgRVRGIChWVEkpDQotIFZFQSBWYW5ndWFyZCBGVFNFIERldmVsb3BlZCBNYXJrZXRzIEVURg0KLSBWR1QJVmFuZ3VhcmQgSW5mb3JtYXRpb24gVGVjaG5vbG9neSBFVEYgDQotIFhMRiBGaW5hbmNpYWwgU2VsZWN0IFNlY3RvciBTUERSIEZ1bmQgDQotIFhMVglIZWFsdGggQ2FyZSBTZWxlY3QgU2VjdG9yIFNQRFIgRnVuZAkNCi0gWExFIEVuZXJneSBTZWxlY3QgU2VjdG9yIFNQRFIgRnVuZA0KLSBYTEkgSW5kdXN0cmlhbCBTZWxlY3QgU2VjdG9yIFNQRFIgRnVuZA0KLSBWTlEgKEFscmVhZHkgaW4gTGlzdCkNCi0gWExZIENvbnN1bWVyIERpc2NyZXRpb25hcnkgU2VsZWN0IFNlY3RvciBTUERSIEZ1bmQNCi0gVkFXIFZhbmd1YXJkIE1hdGVyaWFscyBFVEYNCi0gWExQIENvbnN1bWVyIFN0YXBsZXMgU2VsZWN0IFNlY3RvciBTUERSIEZ1bmQNCi0gVlBVIFZhbmd1YXJkIFV0aWxpdGllcyBFVEYNCg0KDQpUaGVzZSBFVEZzIGhhdmUgYmVlbiBzZWxlY3RlZCB3aXRoIHRoZSBjb25zaWRlcmF0aW9ucyBvZjoNCg0KLSBGb2N1c2VkIG9uIGxhcmdlIGNhcCBjb21wYW5pZXMgdG8gcmVkdWNlIHN5c3RlbWF0aWMgcmlzaw0KLSBIaWdobHkgbGlxdWlkIHdpdGggYXZlcmFnZSBkYWlseSB0cmFkaW5nIHZvbHVtZSBhYm92ZSAxMDBrDQotIFVTRCBkZW5vbWluYXRlZCB0byByZWR1Y2UgdGhlIHJpc2sgb2YgZm9yZXgNCi0gRGl2ZXJzaWZpY2F0aW9uIGluIEVURiBob2xkaW5ncyBhbmQgc2VjdG9ycyAoYmFzZWQgb24gdGhlIDExIEdJQ1Mgc2VjdG9ycykNCi0gRGl2ZXJzaWZpY2F0aW9uIGluIHRlcm1zIG9mIG1hcmtldHMgaS5lLiBFTSwgVVMsIGJvbmQNCg0KDQpgYGB7cn0NCm5ld19ldGY9IGMoDQogICdWVEknLA0KICAnVkVBJywNCiAgJ1ZHVCcsDQogICdYTEYnLA0KICAnWExFJywNCiAgJ1hMSScsDQogICdYTFknLA0KICAnVkFXJywNCiAgJ1hMUCcsDQogICdWUFUnDQopDQoNCmdldFN5bWJvbHMobmV3X2V0ZiwgYXV0by5hc3NpZ249VCkNCg0KYGBgDQpgYGB7cn0NClZUSSRWVEkuQWRqdXN0ZWQgPSBWVEkkVlRJLkFkanVzdGVkICogdXNkX2pweQ0KVkVBJFZFQS5BZGp1c3RlZCA9IFZFQSRWRUEuQWRqdXN0ZWQgKiB1c2RfanB5DQpWR1QkVkdULkFkanVzdGVkID0gVkdUJFZHVC5BZGp1c3RlZCAqIHVzZF9qcHkNClhMRiRYTEYuQWRqdXN0ZWQgPSBYTEYkWExGLkFkanVzdGVkICogdXNkX2pweQ0KWExFJFhMRS5BZGp1c3RlZCA9IFhMRSRYTEUuQWRqdXN0ZWQgKiB1c2RfanB5DQpYTEkkWExJLkFkanVzdGVkID0gWExJJFhMSS5BZGp1c3RlZCAqIHVzZF9qcHkNClhMWSRYTFkuQWRqdXN0ZWQgPSBYTFkkWExZLkFkanVzdGVkICogdXNkX2pweQ0KVkFXJFZBVy5BZGp1c3RlZCA9IFZBVyRWQVcuQWRqdXN0ZWQgKiB1c2RfanB5DQpYTFAkWExQLkFkanVzdGVkID0gWExQJFhMUC5BZGp1c3RlZCAqIHVzZF9qcHkNClZQVSRWUFUuQWRqdXN0ZWQgPSBWUFUkVlBVLkFkanVzdGVkICogdXNkX2pweQ0KYGBgDQoNCmBgYHtyfQ0KbmV3X3RpY2tlcnMgPSBsaXN0KFZUSSwgVkVBLCBWR1QsIFhMRiwgWExFLCBYTEksIFhMWSwgVkFXLCBYTFAsIFZQVSkNCm5ld19uYW1lID0gbmV3X2V0Zg0KdCA9IFZUSQ0KaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWUNCnBsb3QoZSwgbWFpbj1uYW1lcyhlKSkNCmBgYA0KYGBge3J9DQp0ID0gVkVBDQppbml0LmQgPC0gaW5kZXgodClbMV0gIyBmaXJzdCBkYXRlDQplIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSkgIyBhZGp1c3RlZCB2YWx1ZXMgLyBmaXJzdCBhZGp1c3RlZCB2YWx1ZQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KYGBgDQpgYGB7cn0NCnQgPSBWR1QNCmluaXQuZCA8LSBpbmRleCh0KVsxXSAjIGZpcnN0IGRhdGUNCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKSAjIGFkanVzdGVkIHZhbHVlcyAvIGZpcnN0IGFkanVzdGVkIHZhbHVlDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQpgYGANCmBgYHtyfQ0KdCA9IFhMRg0KaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWUNCnBsb3QoZSwgbWFpbj1uYW1lcyhlKSkNCmBgYA0KYGBge3J9DQp0ID0gWExFDQppbml0LmQgPC0gaW5kZXgodClbMV0gIyBmaXJzdCBkYXRlDQplIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSkgIyBhZGp1c3RlZCB2YWx1ZXMgLyBmaXJzdCBhZGp1c3RlZCB2YWx1ZQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KYGBgDQpgYGB7cn0NCnQgPSBYTEkNCmluaXQuZCA8LSBpbmRleCh0KVsxXSAjIGZpcnN0IGRhdGUNCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKSAjIGFkanVzdGVkIHZhbHVlcyAvIGZpcnN0IGFkanVzdGVkIHZhbHVlDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQpgYGANCmBgYHtyfQ0KdCA9IFhMWQ0KaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWUNCnBsb3QoZSwgbWFpbj1uYW1lcyhlKSkNCmBgYA0KYGBge3J9DQp0ID0gVkFXDQppbml0LmQgPC0gaW5kZXgodClbMV0gIyBmaXJzdCBkYXRlDQplIDwtIHRbLCA2XS9hcy5udW1lcmljKHRbaW5pdC5kLCA2XSkgIyBhZGp1c3RlZCB2YWx1ZXMgLyBmaXJzdCBhZGp1c3RlZCB2YWx1ZQ0KcGxvdChlLCBtYWluPW5hbWVzKGUpKQ0KYGBgDQpgYGB7cn0NCnQgPSBYTFANCmluaXQuZCA8LSBpbmRleCh0KVsxXSAjIGZpcnN0IGRhdGUNCmUgPC0gdFssIDZdL2FzLm51bWVyaWModFtpbml0LmQsIDZdKSAjIGFkanVzdGVkIHZhbHVlcyAvIGZpcnN0IGFkanVzdGVkIHZhbHVlDQpwbG90KGUsIG1haW49bmFtZXMoZSkpDQpgYGANCmBgYHtyfQ0KdCA9IFZQVQ0KaW5pdC5kIDwtIGluZGV4KHQpWzFdICMgZmlyc3QgZGF0ZQ0KZSA8LSB0WywgNl0vYXMubnVtZXJpYyh0W2luaXQuZCwgNl0pICMgYWRqdXN0ZWQgdmFsdWVzIC8gZmlyc3QgYWRqdXN0ZWQgdmFsdWUNCnBsb3QoZSwgbWFpbj1uYW1lcyhlKSkNCmBgYA0KYGBge3J9DQpuZXdfbWVhbnMgPSBjKCkNCm5ld19zZHMgPSBjKCkNCm5ld19yZXR1cm5zID0gYygpDQpmb3IoaSBpbiBzZXEobGVuZ3RoKG5ld19ldGYpKSl7DQogIHRpY2tlciA9IG5ld190aWNrZXJzW2ldW1sxXV0NCiAgcHJpY2VzX21vbnRobHkgPC0gdG8ubW9udGhseSh0aWNrZXIsIG5hbWU9bmV3X25hbWVbaV0sIGluZGV4QXQgPSAibGFzdG9mIiwgT0hMQyA9IFQpDQogIHJldHVybiA8LSBST0MoQWQocHJpY2VzX21vbnRobHkpKQ0KICBuZXdfcmV0dXJucyA9IGNiaW5kKG5ld19yZXR1cm5zLHJldHVybikNCiAgbmV3X21lYW5zID0gYyhuZXdfbWVhbnMsIG1lYW4ocmV0dXJuLCBuYS5ybT1UKSkNCiAgbmV3X3NkcyA9IGMobmV3X3Nkcywgc2QocmV0dXJuLCBuYS5ybT1UKSkNCn0NCm5ld19kZiA9IGRhdGEuZnJhbWUodW5saXN0KG5ld19uYW1lKSwgbmV3X21lYW5zLCBuZXdfc2RzKQ0KY29sbmFtZXMobmV3X2RmKSA9IGMoJ0VURicsJ011X01vbnRobHknLCAnU2lnbWFfTW9udGhseScpDQpuZXdfZGYNCmBgYA0KYGBge3J9DQpsaWJyYXJ5KGZQb3J0Zm9saW8pDQpsaWJyYXJ5KHB1cnJyKQ0KbmV3X3JldHVybnMgPSBkYXRhLmZyYW1lKG5ld19yZXR1cm5zKQ0KDQpjb2xuYW1lcyhuZXdfcmV0dXJucykgPC0gdW5saXN0KG1hcChjb2xuYW1lcyhuZXdfcmV0dXJucyksIGZ1bmN0aW9uKHgpe3VubGlzdChzdHJzcGxpdCh4LCdbLl0nKSlbMV19KSkNCmNvdmRhdGEgPSBjb3YobmV3X3JldHVybnMsIHVzZSA9ICJjb21wbGV0ZS5vYnMiKQ0KDQpjb3JyZGF0YSA9IGNvcihuZXdfcmV0dXJucywgdXNlPSdjb21wbGV0ZS5vYnMnKQ0KaGVhdG1hcChjb3JyZGF0YSkNCmBgYA0KYGBge3J9DQoNCmFsbF9yZXR1cm5zID0gY2JpbmQocmV0dXJucywgbmV3X3JldHVybnMpDQphbGxfcmV0dXJucw0KYGBgDQpgYGB7cn0NCg0KZGF0YSA9IHBvcnRmb2xpb0RhdGEoYXMudGltZVNlcmllcyhhbGxfcmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhhbGxfcmV0dXJucyksXSkpDQpwb3J0ID0gdGFuZ2VuY3lQb3J0Zm9saW8oZGF0YT1kYXRhKQ0KDQpwb3J0DQpgYGANCmBgYHtyfQ0KIyBMb3c6IDAuMDE0NCwgTWVkOiAwLjAyODksIEhpZ2g6IDAuMDcyMg0KIyBMb3cgUmlzayBQb3J0Zm9saW8NCnBTcGVjID0gcG9ydGZvbGlvU3BlYygpDQphbm51YWxfdGFyZ2V0ID0gMC4wMw0KdGFyZ2V0X3JldHVybiA9ICgxK2FubnVhbF90YXJnZXQpKiooMS8xMikgLSAxDQoNCnNldFRhcmdldFJldHVybihwU3BlYykgPSB0YXJnZXRfcmV0dXJuDQpkYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKGFsbF9yZXR1cm5zW2NvbXBsZXRlLmNhc2VzKGFsbF9yZXR1cm5zKSxdKSkNCnBvcnQgPSBlZmZpY2llbnRQb3J0Zm9saW8oZGF0YT1kYXRhLCBzcGVjPXBTcGVjKQ0KDQpwb3J0DQpgYGANCmBgYHtyfQ0KIyBMb3c6IDAuMDE0NCwgTWVkOiAwLjAyODksIEhpZ2g6IDAuMDcyMg0KIyBNZWRpdW0gUmlzayBQb3J0Zm9saW8NCnBTcGVjID0gcG9ydGZvbGlvU3BlYygpDQphbm51YWxfdGFyZ2V0ID0gMC4xNA0KdGFyZ2V0X3JldHVybiA9ICgxK2FubnVhbF90YXJnZXQpKiooMS8xMikgLSAxDQojIA0Kc2V0VGFyZ2V0UmV0dXJuKHBTcGVjKSA9IHRhcmdldF9yZXR1cm4NCiMgZGF0YSA9IHBvcnRmb2xpb0RhdGEoYXMudGltZVNlcmllcyhyZXR1cm5zW2NvbXBsZXRlLmNhc2VzKHJldHVybnMpLF0pKQ0KZGF0YSA9IHBvcnRmb2xpb0RhdGEoYXMudGltZVNlcmllcyhhbGxfcmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhhbGxfcmV0dXJucyksXSkpDQpwb3J0ID0gZWZmaWNpZW50UG9ydGZvbGlvKGRhdGE9ZGF0YSwgc3BlYz1wU3BlYywgY29uc3RyYWludHM9YygnbWF4V1sxOjE5XT0wLjInKSkNCg0KcG9ydA0KYGBgDQpgYGB7cn0NCiMgTG93OiAwLjAxNDQsIE1lZDogMC4wMjg5LCBIaWdoOiAwLjA3MjINCiMgSGlnaCBSaXNrIFBvcnRmb2xpbw0KcFNwZWMgPSBwb3J0Zm9saW9TcGVjKCkNCmFubnVhbF90YXJnZXQgPSAwLjE2DQp0YXJnZXRfcmV0dXJuID0gKDErYW5udWFsX3RhcmdldCkqKigxLzEyKSAtIDENCiMgDQpzZXRUYXJnZXRSZXR1cm4ocFNwZWMpID0gdGFyZ2V0X3JldHVybg0KIyBkYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKHJldHVybnNbY29tcGxldGUuY2FzZXMocmV0dXJucyksXSkpDQpkYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKGFsbF9yZXR1cm5zW2NvbXBsZXRlLmNhc2VzKGFsbF9yZXR1cm5zKSxdKSkNCnBvcnQgPSBlZmZpY2llbnRQb3J0Zm9saW8oZGF0YT1kYXRhLCBzcGVjPXBTcGVjLCBjb25zdHJhaW50cz1jKCdtYXhXWzE6MTldPTAuMicpKQ0KDQpwb3J0DQpgYGANCg0KIyBFZmZpY2llbnQgRnJvbnRpZXIgUGxvdA0KDQoNCmBgYHtyfQ0KDQpzZXRORnJvbnRpZXJQb2ludHMocFNwZWMpIDwtIDIwDQoNCmxvbmdGcm9udGllciA8LSBwb3J0Zm9saW9Gcm9udGllcihkYXRhID0gZGF0YSwgc3BlYyA9IHBTcGVjKQ0KDQpjb2wgPSBxdWFsaVBhbGV0dGUoMzAsICJTZXQxIikNCnRhaWxvcmVkRnJvbnRpZXJQbG90KGxvbmdGcm9udGllciwgcmV0dXJuID0gIm1lYW4iLCByaXNrID0gIkNvdiIpDQpncmlkKCkNCnNpbmdsZUFzc2V0UG9pbnRzKGxvbmdGcm9udGllciwgY29sPSdyZWQnKQ0KDQpgYGANCg0KDQoNCg0KDQpgYGB7cn0NCg0KDQoNCmBgYA0KDQoNCg0KDQoNCg0KDQoNCg0KIyBFeHBlcmltZW50YXRpb24gd2l0aCBUYXJnZXQgUmlzayBhbmQgU2hvcnQgU2VsbGluZyAoZm9yIHNjcmVlbnNob3RzKQ0KYGBge3J9DQpwU3BlYyA9IHBvcnRmb2xpb1NwZWMoKQ0KYW5udWFsX3Jpc2sgPSAwLjA1DQp0YXJnZXRfcmlzayA9IGFubnVhbF9yaXNrL3NxcnQoMTIpDQpzZXRUYXJnZXRSaXNrKHBTcGVjKSA9IHRhcmdldF9yaXNrDQpkYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKHJldHVybnNbY29tcGxldGUuY2FzZXMocmV0dXJucyksXSkpDQpwb3J0ID0gbWF4cmV0dXJuUG9ydGZvbGlvKGRhdGEsIHNwZWM9cFNwZWMpDQoNCnBvcnQNCmBgYA0KYGBge3J9DQpwU3BlYyA9IHBvcnRmb2xpb1NwZWMoKQ0KYW5udWFsX3Jpc2sgPSAwLjENCnRhcmdldF9yaXNrID0gYW5udWFsX3Jpc2svc3FydCgxMikNCnNldFRhcmdldFJpc2socFNwZWMpID0gdGFyZ2V0X3Jpc2sNCmRhdGEgPSBwb3J0Zm9saW9EYXRhKGFzLnRpbWVTZXJpZXMocmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhyZXR1cm5zKSxdKSkNCnBvcnQgPSBtYXhyZXR1cm5Qb3J0Zm9saW8oZGF0YSwgc3BlYz1wU3BlYykNCg0KcG9ydA0KYGBgDQpgYGB7cn0NCnBTcGVjID0gcG9ydGZvbGlvU3BlYygpDQphbm51YWxfcmlzayA9IDAuMQ0KdGFyZ2V0X3Jpc2sgPSBhbm51YWxfcmlzay9zcXJ0KDEyKSAjMC4wMjg5DQpzZXRTb2x2ZXIocFNwZWMpID0gJ3NvbHZlUnNob3J0RXhhY3QnDQpzZXRUYXJnZXRSaXNrKHBTcGVjKSA9IHRhcmdldF9yaXNrDQpkYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKHJldHVybnNbY29tcGxldGUuY2FzZXMocmV0dXJucyksXSkpDQpwb3J0ID0gbWF4cmV0dXJuUG9ydGZvbGlvKGRhdGEsIHNwZWM9cFNwZWMpDQpwcmludCh0YXJnZXRfcmlzaykNCnBvcnQNCmBgYA0KDQpgYGB7cn0NCnBTcGVjID0gcG9ydGZvbGlvU3BlYygpDQphbm51YWxfdGFyZ2V0ID0gMC4xDQp0YXJnZXRfcmV0dXJuID0gKDErYW5udWFsX3RhcmdldCkqKigxLzEyKSAtIDEgIzAuMDA3OTcNCnNldFRhcmdldFJldHVybihwU3BlYykgPSB0YXJnZXRfcmV0dXJuDQpkYXRhID0gcG9ydGZvbGlvRGF0YShhcy50aW1lU2VyaWVzKHJldHVybnNbY29tcGxldGUuY2FzZXMocmV0dXJucyksXSkpDQpwb3J0ID0gZWZmaWNpZW50UG9ydGZvbGlvKGRhdGEsIHNwZWM9cFNwZWMpDQpwcmludCh0YXJnZXRfcmV0dXJuKQ0KcG9ydA0KYGBgDQpgYGB7cn0NCg0KbWkgPSBjKCkNCmZvciAodCBpbiB0aWNrZXJzKSB7DQogIHByaW50KG1pbihpbmRleCh0KSkpDQogIG1pID0gYyhtaSwgbWluKGluZGV4KHQpKSkNCg0KfQ0KZm9yICh0IGluIG5ld190aWNrZXJzKSB7DQogIHByaW50KG1pbihpbmRleCh0KSkpDQogIG1pID0gYyhtaSwgbWluKGluZGV4KHQpKSkNCn0NCmBgYA0K</div>
->>>>>>> Stashed changes
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIkJUMjIwMSBGaW5hbmNlIFByb2plY3QgTm90ZWJvb2siDQpvdXRwdXQ6DQogIGh0bWxfbm90ZWJvb2s6IGRlZmF1bHQNCiAgaHRtbF9kb2N1bWVudDoNCiAgICBkZl9wcmludDogcGFnZWQNCiAgcGRmX2RvY3VtZW50OiBkZWZhdWx0DQplZGl0b3Jfb3B0aW9uczogDQogIGNodW5rX291dHB1dF90eXBlOiBpbmxpbmUNCi0tLQ0KDQpgYGB7ciBzZXR1cCwgaW5jbHVkZT1GQUxTRX0gDQprbml0cjo6b3B0c19jaHVuayRzZXQod2FybmluZyA9IEZBTFNFLCBtZXNzYWdlID0gRkFMU0UpIA0KYGBgDQoNClRoaXMgbm90ZWJvb2sgcXVhbnRpZmllcyB0aGUgYW5hbHlzaXMgd2UgY29uZHVjdGVkIHRvIGFycml2ZSBhdCBvdXIgb3B0aW1hbCBhc3NldCBhbGxvY2F0aW9ucy4NCg0KDQojIyAxLiBEZXRlcm1pbmUgSW52ZXN0bWVudCBQb2xpY3kNCg0KV2hpY2ggcHJvZHVjdHMgc2hvdWxkIGJlIG9mZmVyZWQgdG8gYSB0eXBpY2FsIEphcGFuZXNlIHJldGFpbCBpbnZlc3Rvcg0KDQoNCiMjIyBSaXNrIEFwcGV0aXRlDQoNClRoZSB0eXBpY2FsIEphcGFuZXNlIHJldGFpbCBpbnZlc3RvciBpcyByaXNrIGF2ZXJzZS4gTWFueSBvbGRlciBKYXBhbmVzZSBpbnZlc3RvcnMgbGl2ZWQgdGhyb3VnaCB0aGUgQXNpYW4gRmluYW5jaWFsIENyaXNpcyB3aGljaCBzYXcgYSBodWdlIGFzc2V0IGJ1YmJsZSBhbmQgc3Vic2VxdWVudCBjcmFzaCBpbiBKYXBhbmVzZSBmaW5hbmNpYWwgbWFya2V0cy4gVGhvc2Ugd2hvIGludmVzdGVkIG1vbmV5IHJpZ2h0IGF0IHRoZSBwZWFrIG9mIHRoZSBhc3NldCBidWJibGUgd291bGQgaGF2ZSBsb3N0IGEgY29uc2lkZXJhYmxlIGFtb3VudCBvZiBtb25leS4gSmFwYW4gYWxzbyBlbnRlcmVkIG1hbnkgeWVhcnMgb2YgZGVmbGF0aW9uIGFmdGVyd2FyZHMuDQoNClRoZXJlZm9yZSwgYSB0eXBpY2FsIEphcGFuZXNlIHJldGFpbCBpbnZlc3RvciBpcyBkaXN0aW5jdCBmcm9tIGFuIEFtZXJpY2FuIG9yIEV1cm9wZWFuIHJldGFpbCBpbnZlc3RvciBpbiB0aGF0IHRoZXkgaGF2ZSBleHBlcmllbmNlZCBtb3JlIG1hcmtldCBkb3duc2lkZSBhbmQgbGVzcyBlY29ub21pYyBldXBob3JpYS4gV2UgZXhwZWN0IHRoYXQgdGhleSB3aWxsIGhhdmUgYSBtb3JlIGNvbnNlcnZhdGl2ZSByaXNrIGFwcGV0aXRlIGFuZCBsZXNzIHRvbGVyYW5jZSBmb3IgcG9ydGZvbGlvIGRyYXdkb3duLg0KDQoNCiMjIyBPYmplY3RpdmUgRnVuY3Rpb24NCg0KR2l2ZW4gdGhlIGNvbmRpdGlvbnMgZGVzY3JpYmVkIGFib3ZlLCB3ZSBjaG9vc2UgdG8gYWRvcHQgdGhlICpFZmZpY2llbnQgUmlzayogb3IgKk1hcmtvd2l0eiBQb3J0Zm9saW8qDQoNCioqRml4IFJldHVybiBhbmQgTWluaW1pc2UgUmlzayoqDQoNCiRtaW4gXCBcc2lnbWEoUikgXFwgcy50LiBFKFIpID0gUl97dGFyZ2V0fSQNCg0KDQojIyMgQW1vdW50DQpBcyBzdGF0ZWQgaW4gdGhlIHByZWFtYmxlLCBpbnZlc3RhYmxlIGFtb3VudCBpcyAqKkpQWSAxMDAsMDAwKiouDQoNCg0KDQojIyAyLiBTZWN1cml0eSBBbmFseXNpcw0KDQpQdWxsIGRhdGEgZm9yIHRpY2tlciBkZXNjcmliZWQgYWJvdmUgYW5kIGV4Y2hhbmdlIHJhdGVzIGZvciBjdXJyZW5jeSBjb252ZXJzaW9uLg0KDQpgYGB7cn0NCnJlcXVpcmUocXVhbnRtb2QpDQpyZXF1aXJlKHByaWNlUikNCmBgYA0KDQpgYGB7cn0NCiNVU0EgRGVub21pbmF0ZWQNCg0KdXNfZXRmID0gYygNCiAgJ0JJVicsICMgVVMgSU5URVJNRURJQVRFIEJPTkQNCiAgJ1ZDU0gnLCMgVVMgSU5WRVNUTUVOVCBHUkFERSBCT05EDQogICdCTkRYJywjIEdMT0JBTCBCT05EIEVURg0KICAnVk5RJywgI1VTIFJFSVQNCiAgJ1ZUJywgI0dMT0JBTCBTVE9DSycNCiAgJ1NQWScsICNVUyBTVE9DSyAoU1BEUikNCiAgJ1ZUSScsDQogICdWRUEnLA0KICAnVkdUJywNCiAgJ1hMRicsDQogICdYTEUnLA0KICAnWExJJywNCiAgJ1hMWScsDQogICdWQVcnLA0KICAnWExQJywNCiAgJ1ZQVScsDQogICdIRVdKJywNCiAgJ0RYSicsDQogICdEWlonLA0KICAnR0xEJywNCiAgJ0JEUlknLA0KICAnUkVNJywNCiAgJ0lZUicsDQogICdFV0onLA0KICAnSVZMVScsDQogICdEWEonLA0KICAnQkJKUCcsDQogICdWV09CJw0KICANCikNCg0KIyBKYXBhbiBEZW5vbWluYXRlZA0KDQpqX2V0ZiA9IGMoDQogICcxMzI4LlQnLA0KICAnMTM0My5UJywNCiAgJzEzNDUuVCcsDQogICcxNTQwLlQnLA0KICAnMTU1NS5UJywNCiAgJzE2MTUuVCcsDQogICcyNTYxLlQnDQogIA0KKQ0KDQojIEFVIERlbm9taW5hdGVkDQoNCmF1X2V0ZiA9IGMoDQogICdIVlNULkFYJw0KKQ0KDQoNCmdldFN5bWJvbHModXNfZXRmLCBhdXRvLmFzc2lnbj1UKQ0KZ2V0U3ltYm9scyhqX2V0Ziwgc291cmNlPSd5YWhvb2onLCBhdXRvLmFzc2lnbj1UKQ0KZ2V0U3ltYm9scyhhdV9ldGYsIGF1dG8uYXNzaWduPVQpDQpgYGANCmBgYHtyfQ0KIyBVU0QgdG8gSlBZIEN1cnJlbmN5DQp1c2RfanB5ID0gaGlzdG9yaWNhbF9leGNoYW5nZV9yYXRlcygnVVNEJywgdG89J0pQWScsIHN0YXJ0X2RhdGU9JzIwMDctMDEtMDEnLCBlbmRfZGF0ZT0nMjAyMS0xMS0wOScpDQp1c2RfanB5ID0gYXMueHRzKHVzZF9qcHkkb25lX1VTRF9lcXVpdmFsZW50X3RvX3hfSlBZLCBvcmRlci5ieT1hcy5EYXRlKHVzZF9qcHkkZGF0ZSkpDQoNCiMgQVVEIHRvIEpQWSBDdXJyZW5jeQ0KYXVkX2pweSA9IGhpc3RvcmljYWxfZXhjaGFuZ2VfcmF0ZXMoJ0FVRCcsIHRvPSdKUFknLCBzdGFydF9kYXRlPScyMDA3LTAxLTAxJywgZW5kX2RhdGU9JzIwMjEtMTEtMDknKQ0KYXVkX2pweSA9IGFzLnh0cyhhdWRfanB5JG9uZV9BVURfZXF1aXZhbGVudF90b194X0pQWSwgb3JkZXIuYnk9YXMuRGF0ZShhdWRfanB5JGRhdGUpKQ0KYGBgDQpgYGB7cn0NCiMgQ29udmVydCB1c190aWNrZXJzIHRvIEpQWQ0KdXNfdGlja2VycyA9IHNhcHBseSh1c19ldGYsIEZVTj1mdW5jdGlvbih4KSBldmFsKGFzLnN5bWJvbCh4KSkpDQp1c190aWNrZXJzID0gc2FwcGx5KHVzX3RpY2tlcnMsIEZVTj1mdW5jdGlvbih4KSB4Wyw2XT14Wyw2XSp1c2RfanB5KSANCg0KIyBHZXQgSlAgcmV0dXJucw0Kal90aWNrZXJzID0gc2FwcGx5KGpfZXRmLCBGVU49ZnVuY3Rpb24oeCkgZXZhbChhcy5zeW1ib2woeCkpKQ0Kal90aWNrZXJzID0gc2FwcGx5KGpfdGlja2VycywgRlVOPWZ1bmN0aW9uKHgpIHhbLDZdKSANCg0KIyBDb252ZXJ0IEFVIHRpY2tlcnMgdG8gSlBZDQojIGF1X3RpY2tlcnMgPSBzYXBwbHkoYXVfZXRmLCBGVU49ZnVuY3Rpb24oeCkgZXZhbChhcy5zeW1ib2woeCkpKQ0KIyBhdV90aWNrZXJzID0gc2FwcGx5KGF1X3RpY2tlcnMsIEZVTj1mdW5jdGlvbih4KSB4Wyw2XT14Wyw2XSphdWRfanB5KSANCmF1X3RpY2tlcnM9YyhIVlNULkFYJEhWU1QuQVguQWRqdXN0ZWQqYXVkX2pweSkNCg0KYGBgDQoNCmBgYHtyfQ0KIyBDb252ZXJ0IGludG8geHRzIGRhdGFmcmFtZSBhbmQgbWVyZ2UNCg0KdXNfdGlja2VycyA9IGRvLmNhbGwobWVyZ2UsIHVzX3RpY2tlcnMpDQpuYW1lcyh1c190aWNrZXJzKSA9IHVzX2V0Zg0KDQpqX3RpY2tlcnMgPSBkby5jYWxsKG1lcmdlLCBqX3RpY2tlcnMpDQpuYW1lcyhqX3RpY2tlcnMpID0gal9ldGYNCg0KbmFtZXMoYXVfdGlja2Vycyk9ICdIVlNULkFYJw0KDQphbGxfdGlja2VycyA9IGNiaW5kKHVzX3RpY2tlcnMsIGpfdGlja2VycykNCg0KYWxsX3RpY2tlcnMgPSBjYmluZChhbGxfdGlja2VycywgYXVfdGlja2VycykNCm5hbWVzKGFsbF90aWNrZXJzKVsyOTozNV0gPSBqX2V0Zg0KDQpgYGANCmBgYHtyfQ0KbWVhbnMgPSBjKCkNCnNkcyA9IGMoKQ0KcmV0dXJucyA9IGMoKQ0KDQpmb3IgKHQgaW4gbmFtZXMoYWxsX3RpY2tlcnMpKSB7DQogIHRpY2tlciA9IGFsbF90aWNrZXJzWyx0XQ0KICBwcmljZXNfbW9udGhseSA8LSB0by5tb250aGx5KHRpY2tlciwgbmFtZT10LCBpbmRleEF0ID0gImxhc3RvZiIsIE9ITEMgPSBGKQ0KICByZXR1cm4gPC0gUk9DKHByaWNlc19tb250aGx5KQ0KICByZXR1cm5zID0gY2JpbmQocmV0dXJucyxyZXR1cm4pDQogIG1lYW5zID0gYyhtZWFucywgbWVhbihyZXR1cm4sIG5hLnJtPVQpKQ0KICBzZHMgPSBjKHNkcywgc2QocmV0dXJuLCBuYS5ybT1UKSkgIA0KICANCn0NCg0KYGBgDQpgYGB7cn0NCmRmID0gZGF0YS5mcmFtZShuYW1lcyhhbGxfdGlja2VycyksIG1lYW5zLCBzZHMpDQpjb2xuYW1lcyhkZikgPSBjKCdFVEYnLCdNdV9Nb250aGx5JywgJ1NpZ21hX01vbnRobHknKQ0KZGYNCmBgYA0KYGBge3J9DQpsaWJyYXJ5KGZQb3J0Zm9saW8pDQpsaWJyYXJ5KHB1cnJyKQ0KcmV0dXJucyA9IGRhdGEuZnJhbWUocmV0dXJucykNCg0KY29sbmFtZXMocmV0dXJucykgPC0gdW5saXN0KG1hcChjb2xuYW1lcyhyZXR1cm5zKSwgZnVuY3Rpb24oeCl7dW5saXN0KHN0cnNwbGl0KHgsJ1suXScpKVsxXX0pKQ0KY292ZGF0YSA9IGNvdihyZXR1cm5zLCB1c2UgPSAiY29tcGxldGUub2JzIikNCg0KY29ycmRhdGEgPSBjb3IocmV0dXJucywgdXNlPSdjb21wbGV0ZS5vYnMnKQ0KaGVhdG1hcChjb3JyZGF0YSkNCmBgYA0KIyBQb3J0Zm9saW8gQ29uc3RydWN0aW9uDQoNCmBgYHtyfQ0KIyBDcmVhdGUgaW4tc2FtcGxlIGFuZCBvdXQtc2FtcGxlIHNwbGl0cywgcG9ydGZvbGlvIHdlaWdodHMgYXJlIGJhc2VkIG9uIGluLXNhbXBsZQ0KdHJhaW4gPSBhcy50aW1lU2VyaWVzKGhlYWQocmV0dXJuc1tjb21wbGV0ZS5jYXNlcyhyZXR1cm5zKSxdLCAxNDkpKQ0KdGVzdCA9IGFzLnRpbWVTZXJpZXModGFpbChyZXR1cm5zW2NvbXBsZXRlLmNhc2VzKHJldHVybnMpLF0sIDMwKSkNCmRhdGEgPSBwb3J0Zm9saW9EYXRhKHRyYWluKQ0KcFNwZWMgPSBwb3J0Zm9saW9TcGVjKCkNCg0KYGBgDQpgYGB7cn0NCm4gPSBuY29sKHJldHVybnMpDQpzZXRORnJvbnRpZXJQb2ludHMocFNwZWMpIDwtIDIwDQpsb25nRnJvbnRpZXIgPC0gcG9ydGZvbGlvRnJvbnRpZXIoZGF0YSA9IGRhdGEsIHNwZWMgPSBwU3BlYykNCmNvbCA9IHF1YWxpUGFsZXR0ZShuLCAiU2V0MSIpDQp0YWlsb3JlZEZyb250aWVyUGxvdChsb25nRnJvbnRpZXIsIHJldHVybiA9ICJtZWFuIiwgcmlzayA9ICJDb3YiKQ0KZ3JpZCgpDQpzaW5nbGVBc3NldFBvaW50cyhsb25nRnJvbnRpZXIsIGNvbD0ncmVkJykNCg0KYGBgDQoNCmBgYHtyfQ0KYGBge3IgZmlnLmhlaWdodD0xMCwgZmlnLndpZHRoPTE1fQ0KDQojIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjDQojICAgICAgRWZmaWNpZW50IEZyb250aWVyICAgICAgICAgICAgICAjDQojIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjDQoNCg0KDQoNCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMNCiMgICAgICBMT1cgUklTSyBQT1JURk9MSU8gICAgICAgICAgICAgICMNCiMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMNCg0KYW5udWFsX3RhcmdldCA9IDAuMDcNCnRhcmdldF9yZXR1cm4gPSAoMSthbm51YWxfdGFyZ2V0KSoqKDEvMTIpIC0gMQ0KDQojIG9wdGltaXNlIHdlaWdodHMNCnNldFRhcmdldFJldHVybihwU3BlYykgPSB0YXJnZXRfcmV0dXJuDQpwb3J0ID0gZWZmaWNpZW50UG9ydGZvbGlvKGRhdGE9ZGF0YSwgc3BlYz1wU3BlYykNCg0KcG9ydA0KDQojIHBlcmZvcm1hbmNlIG9uIHRlc3Qgc2V0DQpvcHRfd2VpZ2h0cyA8LSBwb3J0QHBvcnRmb2xpb0Bwb3J0Zm9saW8kd2VpZ2h0cw0Kb3B0X3dlaWdodHMgPC0gYXMuZGF0YS5mcmFtZShvcHRfd2VpZ2h0cykNCnJldHVybnNfdGltZXNlcmllcyA8LSB0ZXN0DQpvcHRfcG9ydGZvbGlvIDwtIHJldHVybnNfdGltZXNlcmllcypvcHRfd2VpZ2h0cyRvcHRfd2VpZ2h0c1ttYXRjaChuYW1lcyhyZXR1cm5zX3RpbWVzZXJpZXMpLCByb3duYW1lcyhvcHRfd2VpZ2h0cykpXVtjb2wocmV0dXJuc190aW1lc2VyaWVzKV0NCmN1bXVsYXRpdmVfcmV0dXJucyA9IGFzLnh0cyhjdW1wcm9kKHJvd1N1bXMob3B0X3BvcnRmb2xpbykrMSkpDQoNCg0KIyBwbG90IGVxdWFsIHdlaWdodCBwb3J0Zm9saW8NCm4gPSBsZW5ndGgob3B0X3dlaWdodHMkb3B0X3dlaWdodHMpDQplcXVhbF93ZWlnaHRzIDwtIHJlcCgxL24sIG4pDQp3ZWlnaHRzID0gY2JpbmQoZXF1YWxfd2VpZ2h0cywgb3B0X3dlaWdodHMpDQpvcHRfcG9ydGZvbGlvIDwtIHJldHVybnNfdGltZXNlcmllcyp3ZWlnaHRzJGVxdWFsX3dlaWdodHNbbWF0Y2gobmFtZXMocmV0dXJuc190aW1lc2VyaWVzKSwgcm93bmFtZXMod2VpZ2h0cykpXVtjb2wocmV0dXJuc190aW1lc2VyaWVzKV0NCmN1bXVsYXRpdmVfcmV0dXJuc19lcXVhbCA9IGFzLnh0cyhjdW1wcm9kKHJvd1N1bXMob3B0X3BvcnRmb2xpbykrMSkpDQoNCg0KcGxvdChjdW11bGF0aXZlX3JldHVybnNfZXF1YWwsIHR5cGU9J2wnLCB5bGltPWMoLjUsMS44KSkNCmxpbmVzKGN1bXVsYXRpdmVfcmV0dXJucywgIGNvbD0ncmVkJykNCg0KIyBST0xMSU5HIEJBQ0tURVNUIHdpdGggcmViYWxhbmNpbmcNCmxvd1Jpc2tTdHJhdGVneSA8LSBmdW5jdGlvbihkYXRhLCBzcGVjLCBjb25zdHJhaW50cywgYmFja3Rlc3Qpew0KICBQYXJhbWV0ZXJzIDwtIGdldFN0cmF0ZWd5UGFyYW1zKGJhY2t0ZXN0KQ0KICBzdHJhdGVneVBvcnRmb2xpbyA8LSBlZmZpY2llbnRQb3J0Zm9saW8oZGF0YSwgc3BlYywgY29uc3RyYWludHMpDQogIHJldHVybiAoc3RyYXRlZ3lQb3J0Zm9saW8pDQp9DQoNCiMgZ2V0IGZ1bGwgcGVyaW9kIHJldHVybnMgZm9yIGVxdWFsIHdlaWdodGVkDQpmdWxsX3BlcmlvZF9yZXR1cm4gPSBhcy50aW1lU2VyaWVzKGFsbF9yZXR1cm5zW2NvbXBsZXRlLmNhc2VzKGFsbF9yZXR1cm5zKSxdKQ0KZXF1YWxfd2VpZ2h0X2Z1bGxfcGVyaW9kID0gZnVsbF9wZXJpb2RfcmV0dXJuICp3ZWlnaHRzJGVxdWFsX3dlaWdodHNbbWF0Y2gobmFtZXMoZnVsbF9wZXJpb2RfcmV0dXJuKSwgcm93bmFtZXMod2VpZ2h0cykpXVtjb2woZnVsbF9wZXJpb2RfcmV0dXJuKV0NCmJhY2t0ZXN0X2RhdGEgPSBjYmluZChhcy50aW1lU2VyaWVzKHJvd1N1bXMoZXF1YWxfd2VpZ2h0X2Z1bGxfcGVyaW9kKSksIGZ1bGxfcGVyaW9kX3JldHVybikNCg0KYmFja3Rlc3RfZGF0YSA9IGJhY2t0ZXN0X2RhdGFbY29tcGxldGUuY2FzZXMoYmFja3Rlc3RfZGF0YSksIF0NCg0KZGVmYXVsdEJhY2t0ZXN0IDwtIHBvcnRmb2xpb0JhY2t0ZXN0KCkNCnNldFdpbmRvd3NIb3Jpem9uKGRlZmF1bHRCYWNrdGVzdCkgPC0gIjM2bSINCnNldFNtb290aGVySW5pdGlhbFdlaWdodHMoZGVmYXVsdEJhY2t0ZXN0KSA8LSByZXAoMS8yMCwgMjApDQpzZXRTdHJhdGVneUZ1bihkZWZhdWx0QmFja3Rlc3QpIDwtIGxvd1Jpc2tTdHJhdGVneQ0KDQpwZnMgPSBwb3J0Zm9saW9CYWNrdGVzdGluZyhmb3JtdWxhID0gVFMuMX5OMjI1K1lKMTM0MytCSVYrVkNTSCtCTkRYK1ZOUStWVCtTUFkrWUoxNTU1K0hWU1QrVlRJK1ZFQStWR1QrWExGK1hMRStYTEkrWExZK1ZBVytYTFArVlBVLCBzcGVjPXBTcGVjLCBkYXRhID0gYmFja3Rlc3RfZGF0YSwgYmFja3Rlc3QgPSBkZWZhdWx0QmFja3Rlc3QsIHRyYWNlPUZBTFNFKQ0KcGZzX3Ntb290aCA9IHBvcnRmb2xpb1Ntb290aGluZyhwZnMpDQpuZXRQZXJmb3JtYW5jZShwZnNfc21vb3RoKQ0KYmFja3Rlc3RQbG90KHBmc19zbW9vdGgsIGNleCA9IDAuNiwgZm9udCA9IDEsIGZhbWlseSA9ICJtb25vIikNCmBgYA0KYGBgDQo=</div>
 
 
 
@@ -2405,7 +2021,7 @@ $(document).ready(function () {
 <!-- code folding -->
 <script>
 $(document).ready(function () {
-  window.initializeSourceEmbed("fin.Rmd");
+  window.initializeSourceEmbed("fin_v2.md");
   window.initializeCodeFolding("show" === "show");
 });
 </script>
