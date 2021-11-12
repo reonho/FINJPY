@@ -1,0 +1,461 @@
+---
+title: "BT2201 Finance Project Notebook"
+output:
+  html_notebook: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+```
+
+This notebook quantifies the analysis we conducted to arrive at our optimal asset allocations.
+
+
+## 1. Determine Investment Policy
+
+Which products should be offered to a typical Japanese retail investor
+
+
+### Risk Appetite
+
+The typical Japanese retail investor is risk averse. Many older Japanese investors lived through the Asian Financial Crisis which saw a huge asset bubble and subsequent crash in Japanese financial markets. Those who invested money right at the peak of the asset bubble would have lost a considerable amount of money. Japan also entered many years of deflation afterwards.
+
+Therefore, a typical Japanese retail investor is distinct from an American or European retail investor in that they have experienced more market downside and less economic euphoria. We expect that they will have a more conservative risk appetite and less tolerance for portfolio drawdown.
+
+
+### Objective Function
+
+Given the conditions described above, we choose to adopt the *Efficient Risk* or *Markowitz Portfolio*
+
+**Fix Return and Minimise Risk**
+
+(OR find an objective function from here)
+https://pyportfolioopt.readthedocs.io/en/latest/MeanVariance.html 
+
+For a start, maximise Sharpe:
+
+$max \ \frac{E(R) - r_f}{SD(R)}$
+
+
+### Amount
+As stated in the preamble, investable amount is **JPY 100,000**.
+
+## 2. Security Analysis
+
+Pull data for ticker described above and exchange rates for currency conversion.
+```{r}
+require(quantmod)
+require(priceR)
+```
+
+```{r}
+#USA Denominated
+
+# Old Universe of ETFs
+us_etf = c(
+  'BIV', # US INTERMEDIATE BOND
+  'VCSH',# US INVESTMENT GRADE BOND
+  'BNDX',# GLOBAL BOND ETF
+  'VNQ', #US REIT
+  'SPY', #US STOCK (SPDR)
+  'VEA', # Highly correlated with VT and IVLU
+  'VGT',
+  'XLF',
+  'XLE',
+  'XLI',
+  'XLY',
+  'VAW',
+  'XLP',
+  'VPU',
+  'DXJ', # Highly correlated with HEWJ
+  'DZZ',
+  'GLD', # Corrleated with 1540.T  
+  'REM',
+  'EWJ',
+  'IVLU',
+  'VWOB',
+  'PDBC',
+  'GSG'
+)
+
+
+# New Universe of ETFs
+# us_etf = c(
+#   'BIV', # US INTERMEDIATE BOND
+#   'VCSH',# US INVESTMENT GRADE BOND
+#   'BNDX',# GLOBAL BOND ETF
+#   'VNQ', #US REIT
+#   'SPY', #US STOCK (SPDR)
+#   'VEA', # Highly correlated with VT and IVLU
+#   'VGT',
+#   'XLF',
+#   'XLE',
+#   'XLY',
+#   'VAW',
+#   'DXJ', # Highly correlated with HEWJ
+#   'GLD', # Corrleated with 1540.T
+#   'REM',
+#   'EWJ',
+#   # 'IVLU',
+#   'VWOB',
+#   'PDBC'
+#   # 'GSG'
+# )
+
+# Japan Denominated
+
+j_etf = c(
+  '1328.T',
+  '1343.T',
+  '1555.T',
+  '1615.T'
+)
+
+au_etf = c(
+  'HVST.AX'
+)
+
+
+
+getSymbols(us_etf, auto.assign=T)
+getSymbols(j_etf, source='yahooj', auto.assign=T)
+getSymbols(au_etf, auto.assign=T)
+
+```
+```{r}
+# USD to JPY Currency
+usd_jpy = historical_exchange_rates('USD', to='JPY', start_date='2007-01-01', end_date='2021-11-11')
+usd_jpy = as.xts(usd_jpy$one_USD_equivalent_to_x_JPY, order.by=as.Date(usd_jpy$date))
+
+# AUD to JPY Currency
+aud_jpy = historical_exchange_rates('AUD', to='JPY', start_date='2007-01-01', end_date='2021-11-11')
+aud_jpy = as.xts(aud_jpy$one_AUD_equivalent_to_x_JPY, order.by=as.Date(aud_jpy$date))
+```
+```{r}
+# Convert us_tickers to JPY
+us_tickers = sapply(us_etf, FUN=function(x) eval(as.symbol(x)))
+us_tickers = sapply(us_tickers, FUN=function(x) x[,6]=x[,6]*usd_jpy) 
+
+# Get JP returns
+j_tickers = sapply(j_etf, FUN=function(x) eval(as.symbol(x)))
+j_tickers = sapply(j_tickers, FUN=function(x) x[,6]) 
+
+# Convert AU tickers to JPY
+# au_tickers = sapply(au_etf, FUN=function(x) eval(as.symbol(x)))
+# au_tickers = sapply(au_tickers, FUN=function(x) x[,6]=x[,6]*aud_jpy)
+au_tickers=c(HVST.AX$HVST.AX.Adjusted*aud_jpy)
+
+```
+
+```{r}
+# Convert into xts dataframe and merge
+
+us_tickers = do.call(merge, us_tickers)
+names(us_tickers) = us_etf
+
+j_tickers = do.call(merge, j_tickers)
+names(j_tickers) = j_etf
+
+# names(au_tickers)= 'HVST.AX'
+
+all_tickers = cbind(us_tickers, j_tickers)
+
+# names(all_tickers)[19:21] = j_etf
+all_tickers = cbind(all_tickers, au_tickers)
+# names(all_tickers)[29:35] = j_etf
+
+```
+```{r}
+means = c()
+sds = c()
+returns = c()
+
+for (t in names(all_tickers)) {
+  ticker = all_tickers[,t]
+  prices_monthly <- to.monthly(ticker, name=t, indexAt = "lastof", OHLC = F)
+  return <- ROC(prices_monthly)
+  returns = cbind(returns,return)
+  means = c(means, mean(return, na.rm=T))
+  sds = c(sds, sd(return, na.rm=T))  
+  
+}
+# names(returns)[19:21] = j_etf
+```
+```{r}
+df = data.frame(names(all_tickers), means, sds)
+colnames(df) = c('ETF','Mu_Monthly', 'Sigma_Monthly')
+df
+```
+```{r}
+library(fPortfolio)
+library(purrr)
+returns = data.frame(returns)
+
+colnames(returns) <- unlist(map(colnames(returns), function(x){unlist(strsplit(x,'[.]'))[1]}))
+covdata = cov(returns, use = "complete.obs")
+
+corrdata = cor(returns, use='complete.obs')
+heatmap(corrdata)
+```
+# Portfolio Construction
+
+```{r}
+# Create in-sample and out-sample splits, portfolio weights are based on in-sample
+train = as.timeSeries(head(returns[complete.cases(returns),], 149))
+test = as.timeSeries(tail(returns[complete.cases(returns),], 30))
+data = portfolioData(train)
+pSpec = portfolioSpec()
+
+```
+```{r}
+n = ncol(returns)
+setNFrontierPoints(pSpec) <- length(getData(data)$names)
+longFrontier <- portfolioFrontier(data = data, spec = pSpec)
+col = qualiPalette(n, "Set1")
+tailoredFrontierPlot(longFrontier, return = "mean", risk = "Cov")
+grid()
+singleAssetPoints(longFrontier, col='red')
+
+```
+```{r}
+# Low: 0.0144, Med: 0.0289, High: 0.0722
+# c1 = 'minsumW[c(22,23,24,25,25)]=0.3'
+# constraints = c(c1)
+# Low Risk Portfolio
+annual_target = 0.18
+target_return = (1+annual_target)**(1/12) - 1
+
+# optimise weights
+setTargetReturn(pSpec) = target_return
+port = efficientPortfolio(data=data, spec=pSpec)
+
+port
+```
+```{r}
+# Low: 0.0144, Med: 0.0289, High: 0.0722
+
+# Low Risk Portfolio + Constraints
+c1 = 'minsumW[c(15,19,22,23,24,25)]=0.3' # Sum of JPY assets
+c2 = 'minsumW[c(1,2,3,21)]=0.3' # Bonds
+c3 = 'minsumW[c(4,16,17,22,23,24)]=0.1' # Others
+c4 = 'maxW[1:26]=0.2' # No single asset
+
+low_constraints = c(c4)
+annual_target = 0.01
+target_return = (1+annual_target)**(1/12) - 1
+low_pspec = portfolioSpec()
+
+# optimise weights
+setTargetReturn(low_pspec) = target_return
+lowPort = efficientPortfolio(data=data, spec=low_pspec, constraints=low_constraints)
+
+lowPort
+```
+
+```{r} 
+# Medium Risk Portfolio
+
+annual_target = 0.13
+target_return = (1+annual_target)**(1/12) - 1
+
+# optimise weights
+setTargetReturn(pSpec) = target_return
+port = efficientPortfolio(data=data, spec=pSpec)
+
+port
+```
+```{r} 
+# Medium Risk Portfolio
+
+annual_target = 0.12
+target_return = (1+annual_target)**(1/12) - 1
+
+c1 = 'minsumW[c(15,19,22,23,24,25,25)]=0.2' # Sum of JPY assets = 0.2
+c2 = 'minsumW[c(1,2,3,21)]=0.2' # Bonds min 20%
+c3 = 'minsumW[c(4,16,17,18,22,23,24,25)]=0.1' # Others (gold, reit min 10%)
+c4 = 'maxW[1:26]=0.25' # No single asset > 20%
+
+med_constraints=c(c1,c2,c3,c4)
+
+med_pspec = portfolioSpec()
+# optimise weights
+setTargetReturn(med_pspec) = target_return
+medPort = efficientPortfolio(data=data, spec=med_pspec, constraints=med_constraints)
+
+medPort
+```
+```{r}
+
+pSpec = portfolioSpec()
+
+# setSolver(pSpec) = 'solveRshortExact'
+# High Risk
+annual_target = 0.18
+target_return = (1+annual_target)**(1/12) - 1
+
+# optimise weights
+setTargetReturn(pSpec) = target_return
+port = efficientPortfolio(data=data, spec=pSpec)
+
+port
+
+```
+```{r}
+
+pSpec = portfolioSpec()
+
+c1 = 'minsumW[c(12,19,20,21)]=0.1' # Sum of JPY assets = 0.3
+c2 = 'minsumW[c(1,2,3,16)]=0.07' # Bonds min 30%
+c3 = 'minsumW[c(4,14,20,17,18)]=0.07' # Others (gold, reit min 10%)
+c4 = 'maxW[1:26]=0.35' # No single asset > 20%
+
+high_constraints=c(c1,c2,c3,c4)
+high_pspec = portfolioSpec()
+
+# High Risk
+annual_target = 0.165
+target_return = (1+annual_target)**(1/12) - 1
+
+# optimise weights
+setTargetReturn(high_pspec) = target_return
+highPort = efficientPortfolio(data=data, spec=high_pspec, high_constraints)
+highPort
+
+```
+```{r}
+calculateSR = function(returns) {
+  rf = 0.001 # Japan RF rate average
+  excess_returns = returns - rf # Excess portfolio returns
+  portfolio_sd = sd(excess_returns)
+  return(mean(excess_returns)/portfolio_sd)
+}
+
+
+
+```
+```{r fig.height=20, fig.width=30}
+
+getReturns = function(port, returns_ts) {
+  opt_weights <- port@portfolio@portfolio$weights
+  opt_weights <- as.data.frame(opt_weights)  
+  returns_timeseries <- returns_ts  
+  opt_portfolio <- returns_timeseries*opt_weights$opt_weights[match(names(returns_timeseries), rownames(opt_weights))][col(returns_timeseries)]
+  return(rowSums(opt_portfolio))
+  
+}
+
+getCumulativeReturns = function(port) {
+  opt_weights <- port@portfolio@portfolio$weights
+  opt_weights <- as.data.frame(opt_weights)
+  returns_timeseries <- test
+  opt_portfolio <- returns_timeseries*opt_weights$opt_weights[match(names(returns_timeseries), rownames(opt_weights))][col(returns_timeseries)]
+  cumulative_returns = as.xts(cumprod(rowSums(opt_portfolio)+1))
+  return(cumulative_returns)
+}
+
+# performance on test set
+opt_weights <- port@portfolio@portfolio$weights
+opt_weights <- as.data.frame(opt_weights)
+returns_timeseries <- test
+opt_portfolio <- returns_timeseries*opt_weights$opt_weights[match(names(returns_timeseries), rownames(opt_weights))][col(returns_timeseries)]
+cumulative_returns = as.xts(cumprod(rowSums(opt_portfolio)+1))
+
+
+# plot equal weight portfolio
+n = length(opt_weights$opt_weights)
+equal_weights <- rep(1/n, n)
+weights = cbind(equal_weights, opt_weights)
+opt_portfolio <- returns_timeseries*weights$equal_weights[match(names(returns_timeseries), rownames(weights))][col(returns_timeseries)]
+equal_r = rowSums(opt_portfolio)
+cumulative_returns_equal = as.xts(cumprod(equal_r+1))
+
+
+# In-sample metrics for each portfolio
+low_r_in = getReturns(lowPort, train)
+med_r_in = getReturns(medPort, train)
+high_r_in = getReturns(highPort, train)
+
+low_sr_in = calculateSR(low_r_in)
+med_sr_in = calculateSR(med_r_in)
+high_sr_in = calculateSR(high_r_in)
+
+
+
+
+
+# Out of sample metrics for each portfolio
+
+low_r = getReturns(lowPort, test)
+med_r = getReturns(medPort, test)
+high_r = getReturns(highPort, test)
+
+equal_sr = calculateSR(equal_r)
+low_sr = calculateSR(low_r)
+med_sr = calculateSR(med_r) 
+high_sr = calculateSR(high_r)
+
+low_cr = getCumulativeReturns(lowPort)
+med_cr = getCumulativeReturns(medPort)
+high_cr = getCumulativeReturns(highPort)
+
+
+
+plot(cumulative_returns_equal, type='l', ylim=c(.5,2.0), main='Cumulative Returns of Portfolios', xlab='Month', ylab='Cumulative Returns')
+lines(low_cr,  col='red')
+lines(med_cr, col='blue')
+lines(high_cr, col='green')  
+
+legend(x='bottomleft', legend=c('Equal Portfolio', 'Low Risk', 'Medium Risk', 'High Risk'), col=c('black', 'red', 'blue', 'green'))
+
+```
+
+```{r fig.height=20, fig.width=30}
+
+
+# ROLLING BACKTEST with rebalancing
+lowRiskStrategy <- function(data, spec, constraints, backtest){
+  Parameters <- getStrategyParams(backtest)
+  strategyPortfolio <- efficientPortfolio(data, spec, constraints)
+  return (strategyPortfolio)
+}
+
+# get full period returns for equal weighted
+full_period_return = as.timeSeries(returns[complete.cases(returns),])
+equal_weight_full_period = full_period_return *weights$equal_weights[match(names(full_period_return), rownames(weights))][col(full_period_return)]
+backtest_data = cbind(as.timeSeries(rowSums(equal_weight_full_period)), full_period_return)
+
+backtest_data = backtest_data[complete.cases(backtest_data), ]
+
+defaultBacktest <- portfolioBacktest()
+setWindowsHorizon(defaultBacktest) <- "36m"
+setSmootherInitialWeights(defaultBacktest) <- rep(1/26, 26)
+
+# Rolling Backtest  - Low Risk
+setStrategyFun(defaultBacktest) <- lowRiskStrategy
+pfs = portfolioBacktesting(formula = TS.1~BIV+VCSH+BNDX+VNQ+SPY+VEA+VGT+XLF+XLE+XLI+XLY+VAW+XLP+VPU+DXJ+DZZ+GLD+REM+EWJ+IVLU+VWOB+X1328+X1343+X1555+X1615+HVST, spec=low_pspec, data = backtest_data, backtest = defaultBacktest, trace=FALSE)
+pfs_smooth = portfolioSmoothing(pfs)
+backtestPlot(pfs_smooth, cex = 0.6, font = 1, family = "mono")
+```
+```{r}
+netPerformance(pfs_smooth)
+```
+```{r fig.height=20, fig.width=30}
+pfs = portfolioBacktesting(formula = TS.1~BIV+VCSH+BNDX+VNQ+SPY+VEA+VGT+XLF+XLE+XLI+XLY+VAW+XLP+VPU+DXJ+DZZ+GLD+REM+EWJ+IVLU+VWOB+X1328+X1343+X1555+X1615+HVST, spec=med_pspec, data = backtest_data, backtest = defaultBacktest, trace=FALSE)
+pfs_smooth = portfolioSmoothing(pfs)
+backtestPlot(pfs_smooth, cex = 0.6, font = 1, family = "mono")
+```
+```{r}
+netPerformance(pfs_smooth)
+```
+```{r fig.height=20, fight.width=30}
+pfs = portfolioBacktesting(formula = TS.1~BIV+VCSH+BNDX+VNQ+SPY+VEA+VGT+XLF+XLE+XLI+XLY+VAW+XLP+VPU+DXJ+DZZ+GLD+REM+EWJ+IVLU+VWOB+X1328+X1343+X1555+X1615+HVST, spec=high_pspec, data = backtest_data, backtest = defaultBacktest, constraints=high_constraints, trace=FALSE)
+pfs_smooth = portfolioSmoothing(pfs)
+backtestPlot(pfs_smooth, cex = 0.6, font = 1, family = "mono")
+```
+```{r}
+netPerformance(pfs_smooth)
+```
+}
